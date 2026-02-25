@@ -6,18 +6,18 @@ import { QrCode, User, School, Calendar, FileText, Download, Share2 } from 'luci
 export default function Dashboard() {
     const [formData, setFormData] = useState({
         name: 'Joko Setyo Nugroho, S.T',
-        class: 'X TKR 3',
-        subject: 'Rapor Sumatif Tengah Semester Gasal T.A 2023-2024',
-        date: '23 Maret 2024',
+        class: 'XII TKR 3',
+        subject: 'Rapor Sumatif Tengah Semester Gasal T.A 2025-2026',
+        date: '23 Maret 2026',
         unit: 'SMK Mitra Industri MM2100'
     });
 
     const [qrUrl, setQrUrl] = useState('');
 
     useEffect(() => {
-        // Generate verification URL
+        // Generate verification URL for HashRouter
         const params = new URLSearchParams(formData).toString();
-        const baseUrl = window.location.origin + '/verify';
+        const baseUrl = window.location.origin + window.location.pathname + '#/verify';
         setQrUrl(`${baseUrl}?${params}`);
     }, [formData]);
 
