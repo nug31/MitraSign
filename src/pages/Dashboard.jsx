@@ -28,17 +28,41 @@ export default function Dashboard() {
     const downloadQr = () => {
         const svg = document.getElementById('qr-code-svg');
         if (!svg) return;
+
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const img = new Image();
-        img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            if (ctx) {
+        if (!ctx) return;
+
+        const qrImg = new Image();
+        const logoImg = new Image();
+
+        let loadedCount = 0;
+        const handleLoad = () => {
+            loadedCount++;
+            if (loadedCount === 2) {
+                canvas.width = qrImg.width;
+                canvas.height = qrImg.height;
+
+                // Draw background
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
+
+                // Draw QR Code
+                ctx.drawImage(qrImg, 0, 0);
+
+                // Draw Logo manually in the center
+                // QRCodeSVG imageSettings size is 40, we'll match that
+                const logoSize = 40;
+                const x = (canvas.width - logoSize) / 2;
+                const y = (canvas.height - logoSize) / 2;
+
+                // Draw a white background for the logo to ensure visibility (excavate effect)
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x, y, logoSize, logoSize);
+
+                ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+
                 const pngFile = canvas.toDataURL('image/png');
                 const downloadLink = document.createElement('a');
                 downloadLink.download = `QR_Signature_${formData.name}.png`;
@@ -46,7 +70,13 @@ export default function Dashboard() {
                 downloadLink.click();
             }
         };
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+
+        qrImg.onload = handleLoad;
+        logoImg.onload = handleLoad;
+
+        // Use encodeURIComponent to handle special characters safely
+        qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        logoImg.src = '/logo.png';
     };
 
     return (
