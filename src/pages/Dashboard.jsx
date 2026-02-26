@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion } from 'framer-motion';
-import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, History, Save, Loader2, CheckCircle } from 'lucide-react';
+import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, History, Save, Loader2, CheckCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
@@ -55,6 +55,34 @@ export default function Dashboard() {
 
     const handleSave = async () => {
         setLoading(true);
+
+        // 1. Ensure profile exists (Foreign Key Safety)
+        if (!profile) {
+            const { data: profileCheck, error: checkError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', user.id)
+                .single();
+
+            if (checkError || !profileCheck) {
+                // Profile missing, try to create it manually as a fallback
+                const { error: createError } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        id: user.id,
+                        full_name: user.user_metadata?.full_name || 'Anonymous Walas',
+                        unit_name: 'SMK Mitra Industri MM2100'
+                    }]);
+
+                if (createError) {
+                    alert('Gagal membuat profil: ' + createError.message + '\nPastikan kamu sudah menjalankan SQL Schema di Supabase.');
+                    setLoading(false);
+                    return;
+                }
+            }
+        }
+
+        // 2. Insert Signature
         const { data, error } = await supabase
             .from('signatures')
             .insert([{
@@ -137,6 +165,18 @@ export default function Dashboard() {
                         <History size={18} />
                         History
                     </button>
+                    {profile?.role === 'admin' && (
+                        <>
+                            <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
+                            <button
+                                onClick={() => navigate('/admin')}
+                                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
+                            >
+                                <ShieldCheck size={18} />
+                                Admin Panel
+                            </button>
+                        </>
+                    )}
                     <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
                     <div className="flex items-center gap-3">
                         <div className="text-right">
@@ -226,8 +266,8 @@ export default function Dashboard() {
                         onClick={handleSave}
                         disabled={loading || !formData.class || !formData.subject}
                         className={`w-full mt-8 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all ${savedId
-                                ? 'bg-green-500/20 text-green-500 border border-green-500/50'
-                                : 'bg-accent hover:bg-accent-hover text-black'
+                            ? 'bg-green-500/20 text-green-500 border border-green-500/50'
+                            : 'bg-accent hover:bg-accent-hover text-black'
                             }`}
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : (savedId ? <CheckCircle size={20} /> : <Save size={20} />)}
@@ -281,8 +321,8 @@ export default function Dashboard() {
                                 onClick={downloadQr}
                                 disabled={!savedId}
                                 className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${savedId
-                                        ? 'bg-white/10 hover:bg-white/20 text-white'
-                                        : 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                    ? 'bg-white/10 hover:bg-white/20 text-white'
+                                    : 'bg-white/5 text-gray-600 cursor-not-allowed'
                                     }`}
                             >
                                 <Download size={18} />
@@ -292,8 +332,8 @@ export default function Dashboard() {
                                 onClick={() => window.open(qrUrl, '_blank')}
                                 disabled={!savedId}
                                 className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${savedId
-                                        ? 'bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30'
-                                        : 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                    ? 'bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30'
+                                    : 'bg-white/5 text-gray-600 cursor-not-allowed'
                                     }`}
                             >
                                 <Share2 size={18} />

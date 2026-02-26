@@ -29,7 +29,7 @@ ON profiles FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" 
-ON profiles FOR UPDATE USING (auth.uid() = id);
+ON profiles FOR UPDATE USING (auth.uid() = id OR (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
 
 -- 5. Signatures Policies
 DROP POLICY IF EXISTS "Signatures are viewable by everyone" ON signatures;
@@ -42,7 +42,11 @@ ON signatures FOR INSERT WITH CHECK (auth.uid() = created_by);
 
 DROP POLICY IF EXISTS "Users can update own signatures" ON signatures;
 CREATE POLICY "Users can update own signatures" 
-ON signatures FOR UPDATE USING (auth.uid() = created_by);
+ON signatures FOR UPDATE USING (auth.uid() = created_by OR (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "Admins can delete signatures" ON signatures;
+CREATE POLICY "Admins can delete signatures"
+ON signatures FOR DELETE USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
 
 -- 6. Trigger for profile creation on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

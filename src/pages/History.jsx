@@ -3,29 +3,48 @@ import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { motion } from 'framer-motion';
 import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function History() {
-    const { user } = useAuthStore();
+    const { user, profile } = useAuthStore();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [signatures, setSignatures] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [targetProfile, setTargetProfile] = useState(null);
+
+    // Get target user from URL or fallback to current user
+    const targetUserId = searchParams.get('user') || user?.id;
 
     useEffect(() => {
         if (!user) {
             navigate('/login');
             return;
         }
-        fetchHistory();
-    }, [user, navigate]);
+        if (targetUserId) {
+            fetchHistory();
+            if (targetUserId !== user.id) {
+                fetchTargetProfile();
+            }
+        }
+    }, [user, targetUserId, navigate]);
+
+    const fetchTargetProfile = async () => {
+        const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', targetUserId)
+            .single();
+        if (data) setTargetProfile(data);
+    };
 
     const fetchHistory = async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('signatures')
             .select('*')
-            .eq('created_by', user.id)
+            .eq('created_by', targetUserId)
             .order('created_at', { ascending: false });
 
         if (!error) {
@@ -69,6 +88,15 @@ export default function History() {
                     Riwayat Tanda Tangan
                 </h1>
             </div>
+
+            {targetUserId !== user.id && targetProfile && (
+                <div className="glass-card mb-6 border-blue-500/30 bg-blue-500/5">
+                    <p className="text-blue-400 font-medium flex items-center gap-2">
+                        <School size={18} />
+                        Menampilkan riwayat milik: <span className="text-white font-bold">{targetProfile.full_name}</span>
+                    </p>
+                </div>
+            )}
 
             <div className="glass-card mb-6">
                 <div className="relative">

@@ -7,6 +7,7 @@ import Verification from './pages/Verification';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import History from './pages/History';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
     const { setUser, fetchProfile, loading, setLoading } = useAuthStore();
@@ -50,6 +51,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/history" element={<History />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
                 </Routes>
             </div>
         </Router>
