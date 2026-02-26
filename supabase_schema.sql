@@ -1,5 +1,5 @@
 -- 1. Create Profiles table
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT,
   unit_name TEXT DEFAULT 'SMK Mitra Industri MM2100',
@@ -9,7 +9,7 @@ CREATE TABLE profiles (
 );
 
 -- 2. Create Signatures table
-CREATE TABLE signatures (
+CREATE TABLE IF NOT EXISTS signatures (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_by UUID REFERENCES profiles(id) ON DELETE CASCADE,
   subject TEXT NOT NULL,
@@ -23,19 +23,24 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE signatures ENABLE ROW LEVEL SECURITY;
 
 -- 4. Profiles Policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone" 
 ON profiles FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" 
 ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- 5. Signatures Policies
+DROP POLICY IF EXISTS "Signatures are viewable by everyone" ON signatures;
 CREATE POLICY "Signatures are viewable by everyone" 
 ON signatures FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert own signatures" ON signatures;
 CREATE POLICY "Users can insert own signatures" 
 ON signatures FOR INSERT WITH CHECK (auth.uid() = created_by);
 
+DROP POLICY IF EXISTS "Users can update own signatures" ON signatures;
 CREATE POLICY "Users can update own signatures" 
 ON signatures FOR UPDATE USING (auth.uid() = created_by);
 
@@ -44,11 +49,27 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
   INSERT INTO public.profiles (id, full_name, unit_name)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name', 'SMK Mitra Industri MM2100');
+  VALUES (
+    new.id, 
+    COALESCE(new.raw_user_meta_data->>'full_name', 'User Baru'), 
+    'SMK Mitra Industri MM2100'
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Re-create trigger
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 7. Sync existing users (IMPORTANT: Jalankan ini jika sudah ada yang daftar)
+INSERT INTO public.profiles (id, full_name, unit_name)
+SELECT 
+  id, 
+  COALESCE(raw_user_meta_data->>'full_name', 'Walas SMK'), 
+  'SMK Mitra Industri MM2100'
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
