@@ -1,17 +1,63 @@
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ShieldCheck, User, Calendar, FileText, School, MapPin } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, User, Calendar, FileText, School, MapPin, Loader2, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function Verification() {
     const [searchParams] = useSearchParams();
+    const sigId = searchParams.get('id');
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState(null);
+    const [error, setError] = useState(null);
 
-    const data = {
-        name: searchParams.get('name') || 'Unknown',
-        class: searchParams.get('class') || '-',
-        subject: searchParams.get('subject') || '-',
-        date: searchParams.get('date') || '-',
-        unit: searchParams.get('unit') || 'SMK Mitra Industri MM2100'
-    };
+    useEffect(() => {
+        const fetchSignature = async () => {
+            if (!sigId) {
+                setError('ID Tanda Tangan tidak ditemukan.');
+                setLoading(false);
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('signatures')
+                .select(`
+                    *,
+                    profiles (
+                        full_name,
+                        unit_name
+                    )
+                `)
+                .eq('id', sigId)
+                .single();
+
+            if (error) {
+                setError('Dokumen tidak dapat diverifikasi atau ID tidak valid.');
+            } else {
+                setData(data);
+            }
+            setLoading(false);
+        };
+
+        fetchSignature();
+    }, [sigId]);
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="animate-spin text-accent w-12 h-12" />
+        </div>
+    );
+
+    if (error || !data) return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="max-w-md w-full glass-card border-t-4 border-t-red-500 text-center p-8">
+                <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h1 className="text-xl font-bold text-white mb-2">Verifikasi Gagal</h1>
+                <p className="text-gray-400 text-sm mb-6">{error || 'Data tidak ditemukan'}</p>
+                <button onClick={() => window.location.href = '/'} className="btn-primary w-full">Kembali ke Beranda</button>
+            </div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
@@ -37,7 +83,7 @@ export default function Verification() {
                     <h1 className="text-2xl font-bold text-white">Verification Status</h1>
                     <p className="text-green-500 font-semibold flex items-center justify-center gap-2 mt-1">
                         <CheckCircle2 size={16} />
-                        Officially Signed
+                        Officially Signed & Verified
                     </p>
                 </div>
 
@@ -48,8 +94,8 @@ export default function Verification() {
                         </div>
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Penandatangan</p>
-                            <p className="text-lg font-semibold text-white leading-tight">{data.name}</p>
-                            <p className="text-sm text-gray-400">Wali Kelas {data.class}</p>
+                            <p className="text-lg font-semibold text-white leading-tight">{data.profiles?.full_name}</p>
+                            <p className="text-sm text-gray-400">Wali Kelas {data.class_name}</p>
                         </div>
                     </div>
 
@@ -69,7 +115,7 @@ export default function Verification() {
                         </div>
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Tanggal Tanda Tangan</p>
-                            <p className="text-sm text-gray-200 mt-1">{data.date}</p>
+                            <p className="text-sm text-gray-200 mt-1">{data.date_signed}</p>
                         </div>
                     </div>
 
@@ -77,7 +123,7 @@ export default function Verification() {
                         <div className="flex items-center gap-3">
                             <img src="/logo.png" alt="School Logo" className="w-10 h-10 object-contain" />
                             <div>
-                                <p className="text-sm font-bold text-white">{data.unit}</p>
+                                <p className="text-sm font-bold text-white">{data.profiles?.unit_name}</p>
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                     <MapPin size={10} />
                                     <span>Kawasan Industri MM2100</span>
@@ -89,9 +135,9 @@ export default function Verification() {
 
                 <div className="mt-8 pt-6 border-t border-white/10 text-center">
                     <p className="text-[10px] text-gray-600 uppercase tracking-[0.2em]">
-                        Digital Signature ID: {Math.random().toString(36).substring(2, 12).toUpperCase()}
+                        Digital Signature ID:<br />{data.id.toUpperCase()}
                     </p>
-                    <p className="text-[10px] text-gray-600 mt-1">
+                    <p className="text-[10px] text-gray-600 mt-2">
                         &copy; {new Date().getFullYear()} MitraSign - SMK Mitra Industri
                     </p>
                 </div>
