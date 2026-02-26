@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import useAuthStore from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
 
 const AdminDashboard = () => {
     const { user, profile } = useAuthStore();
