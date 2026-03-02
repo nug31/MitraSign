@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ShieldCheck, User, Calendar, FileText, School, MapPin, Loader2, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, User, Calendar, FileText, School, MapPin, Loader2, AlertTriangle, ShieldAlert, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function Verification() {
