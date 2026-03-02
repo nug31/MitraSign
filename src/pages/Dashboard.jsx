@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion } from 'framer-motion';
-import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, History, Save, Loader2, CheckCircle, ShieldCheck, FileUp, Paperclip } from 'lucide-react';
+import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, History, Save, Loader2, CheckCircle, ShieldCheck, FileUp, Paperclip, Edit2, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function Dashboard() {
-    const { user, profile, signOut } = useAuthStore();
+    const { user, profile, signOut, fetchProfile } = useAuthStore();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [savedId, setSavedId] = useState(null);
@@ -15,6 +15,8 @@ export default function Dashboard() {
     const [file, setFile] = useState(null);
     const [fileUrl, setFileUrl] = useState(null);
     const [fileName, setFileName] = useState(null);
+    const [isEditingNik, setIsEditingNik] = useState(false);
+    const [updateNikLoading, setUpdateNikLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -57,6 +59,32 @@ export default function Dashboard() {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setSavedId(null); // Reset saved status on edit
+    };
+
+    const handleUpdateNik = async () => {
+        if (!isEditingNik) {
+            setIsEditingNik(true);
+            return;
+        }
+
+        if (!formData.nik) {
+            alert('NIK tidak boleh kosong');
+            return;
+        }
+
+        setUpdateNikLoading(true);
+        const { error } = await supabase
+            .from('profiles')
+            .update({ nik: formData.nik })
+            .eq('id', user.id);
+
+        if (error) {
+            alert('Gagal memperbarui NIK: ' + error.message);
+        } else {
+            await fetchProfile(user.id);
+            setIsEditingNik(false);
+        }
+        setUpdateNikLoading(false);
     };
 
     const handleSave = async () => {
@@ -260,14 +288,31 @@ export default function Dashboard() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">NIK (Nomor Induk Karyawan)</label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1 flex justify-between items-center">
+                                <span>NIK (Nomor Induk Karyawan)</span>
+                                <button
+                                    onClick={handleUpdateNik}
+                                    disabled={updateNikLoading}
+                                    className="text-[10px] text-accent flex items-center gap-1 hover:underline uppercase font-bold tracking-wider"
+                                >
+                                    {updateNikLoading ? (
+                                        <Loader2 size={12} className="animate-spin" />
+                                    ) : isEditingNik ? (
+                                        <><Check size={12} /> Simpan NIK</>
+                                    ) : (
+                                        <><Edit2 size={12} /> {formData.nik ? 'Ubah' : 'Tambah'} NIK</>
+                                    )}
+                                </button>
+                            </label>
                             <div className="relative flex items-center">
                                 <ShieldCheck className="absolute left-3 w-5 h-5 text-accent/70" />
                                 <input
                                     name="nik"
                                     value={formData.nik}
-                                    readOnly
-                                    className="input-field pl-16 pr-4 bg-white/5 opacity-70 cursor-not-allowed"
+                                    onChange={handleChange}
+                                    readOnly={!isEditingNik}
+                                    className={`input-field pl-16 pr-4 transition-all ${!isEditingNik ? 'bg-white/5 opacity-70 cursor-not-allowed border-transparent' : 'bg-accent/5 border-accent/30 focus:border-accent shadow-[0_0_15px_-5px_theme(colors.accent.DEFAULT)]'}`}
+                                    placeholder="Masukkan NIK Anda..."
                                 />
                             </div>
                         </div>
