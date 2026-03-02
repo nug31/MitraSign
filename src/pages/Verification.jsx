@@ -26,6 +26,7 @@ export default function Verification() {
                     profiles (
                         full_name,
                         nik,
+                        role,
                         unit_name
                     )
                 `)
@@ -96,7 +97,9 @@ export default function Verification() {
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Penandatangan</p>
                             <p className="text-lg font-semibold text-white leading-tight">{data.profiles?.full_name}</p>
-                            <p className="text-sm text-gray-400">Wali Kelas {data.class_name}</p>
+                            <p className="text-sm text-gray-400">
+                                {data.profiles?.role === 'kepsek' ? 'Kepala Sekolah' : `Wali Kelas ${data.class_name}`}
+                            </p>
                             <p className="text-xs text-accent mt-1 uppercase font-bold tracking-wider">NIK. {data.profiles?.nik || '-'}</p>
                         </div>
                     </div>
