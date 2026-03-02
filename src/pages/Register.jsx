@@ -8,6 +8,7 @@ export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
+    const [nik, setNik] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Register() {
             options: {
                 data: {
                     full_name: fullName,
+                    nik: nik,
                 }
             }
         });
@@ -71,6 +73,21 @@ export default function Register() {
                                 onChange={(e) => setFullName(e.target.value)}
                                 className="input-field pl-12 pr-4"
                                 placeholder="Joko Setyo, S.T"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">NIK (Nomor Induk Karyawan)</label>
+                        <div className="relative flex items-center">
+                            <School className="absolute left-3 w-5 h-5 text-gray-500" />
+                            <input
+                                type="text"
+                                value={nik}
+                                onChange={(e) => setNik(e.target.value)}
+                                className="input-field pl-12 pr-4"
+                                placeholder="Contoh: 7012001"
                                 required
                             />
                         </div>

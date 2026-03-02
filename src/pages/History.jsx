@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { motion } from 'framer-motion';
-import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2 } from 'lucide-react';
+import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function History() {
@@ -138,6 +138,12 @@ export default function History() {
                                         <Calendar size={14} />
                                         {sig.date_signed}
                                     </div>
+                                    {sig.attachment_url && (
+                                        <div className="flex items-center gap-1 text-accent font-medium">
+                                            <Paperclip size={14} />
+                                            Lampiran PDF
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 w-full md:w-auto">

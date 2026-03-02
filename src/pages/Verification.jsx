@@ -25,6 +25,7 @@ export default function Verification() {
                     *,
                     profiles (
                         full_name,
+                        nik,
                         unit_name
                     )
                 `)
@@ -96,6 +97,7 @@ export default function Verification() {
                             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Penandatangan</p>
                             <p className="text-lg font-semibold text-white leading-tight">{data.profiles?.full_name}</p>
                             <p className="text-sm text-gray-400">Wali Kelas {data.class_name}</p>
+                            <p className="text-xs text-accent mt-1 uppercase font-bold tracking-wider">NIK. {data.profiles?.nik || '-'}</p>
                         </div>
                     </div>
 
@@ -118,6 +120,32 @@ export default function Verification() {
                             <p className="text-sm text-gray-200 mt-1">{data.date_signed}</p>
                         </div>
                     </div>
+
+                    {data.attachment_url && (
+                        <div className="border-t border-white/10 pt-6">
+                            <a
+                                href={data.attachment_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full flex items-center justify-between p-4 bg-accent/10 border border-accent/20 rounded-xl hover:bg-accent/20 transition-all group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-accent/20 text-accent rounded-lg">
+                                        <FileText size={20} />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-xs text-accent font-bold uppercase tracking-wider">Lampiran PDF</p>
+                                        <p className="text-sm text-white font-medium truncate max-w-[180px]">
+                                            {data.attachment_name || 'Lihat Dokumen'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="p-2 bg-white/5 text-gray-400 rounded-full group-hover:text-accent group-hover:bg-accent/10 transition-colors">
+                                    <Download size={16} />
+                                </div>
+                            </a>
+                        </div>
+                    )}
 
                     <div className="border-t border-white/10 pt-6 mt-6">
                         <div className="flex items-center gap-3">

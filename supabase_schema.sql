@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT,
+  nik TEXT,
   unit_name TEXT DEFAULT 'SMK Mitra Industri MM2100',
   role TEXT DEFAULT 'walas',
   default_class TEXT,
@@ -15,6 +16,8 @@ CREATE TABLE IF NOT EXISTS signatures (
   subject TEXT NOT NULL,
   class_name TEXT NOT NULL,
   date_signed TEXT NOT NULL,
+  attachment_url TEXT,
+  attachment_name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -52,10 +55,11 @@ ON signatures FOR DELETE USING ((SELECT role FROM profiles WHERE id = auth.uid()
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, unit_name)
+  INSERT INTO public.profiles (id, full_name, nik, unit_name)
   VALUES (
     new.id, 
     COALESCE(new.raw_user_meta_data->>'full_name', 'User Baru'), 
+    new.raw_user_meta_data->>'nik',
     'SMK Mitra Industri MM2100'
   )
   ON CONFLICT (id) DO NOTHING;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion } from 'framer-motion';
-import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, History, Save, Loader2, CheckCircle, ShieldCheck } from 'lucide-react';
+import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, History, Save, Loader2, CheckCircle, ShieldCheck, FileUp, Paperclip } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
@@ -11,9 +11,14 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [savedId, setSavedId] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [file, setFile] = useState(null);
+    const [fileUrl, setFileUrl] = useState(null);
+    const [fileName, setFileName] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',
+        nik: '',
         class: '',
         subject: 'Rapor Sumatif Tengah Semester Gasal T.A 2025-2026',
         date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
@@ -33,6 +38,7 @@ export default function Dashboard() {
             setFormData(prev => ({
                 ...prev,
                 name: profile.full_name || '',
+                nik: profile.nik || '',
                 unit: profile.unit_name || 'SMK Mitra Industri MM2100',
                 class: profile.default_class || ''
             }));
@@ -82,14 +88,44 @@ export default function Dashboard() {
             }
         }
 
-        // 2. Insert Signature
+        // 2. Upload PDF if exists (Principal only)
+        let currentFileUrl = null;
+        let currentFileName = null;
+
+        if (file && profile?.role === 'kepsek') {
+            setUploading(true);
+            const fileExt = file.name.split('.').pop();
+            const filePath = `${user.id}/${Math.random()}.${fileExt}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('attachments')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                alert('Gagal mengunggah PDF: ' + uploadError.message);
+                setLoading(false);
+                setUploading(false);
+                return;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('attachments')
+                .getPublicUrl(filePath);
+
+            currentFileUrl = publicUrl;
+            currentFileName = file.name;
+        }
+
+        // 3. Insert Signature
         const { data, error } = await supabase
             .from('signatures')
             .insert([{
                 created_by: user.id,
                 subject: formData.subject,
                 class_name: formData.class,
-                date_signed: formData.date
+                date_signed: formData.date,
+                attachment_url: currentFileUrl,
+                attachment_name: currentFileName
             }])
             .select()
             .single();
@@ -98,8 +134,11 @@ export default function Dashboard() {
             alert('Gagal menyimpan signature: ' + error.message);
         } else {
             setSavedId(data.id);
+            setFileUrl(currentFileUrl);
+            setFileName(currentFileName);
         }
         setLoading(false);
+        setUploading(false);
     };
 
     const downloadQr = () => {
@@ -220,6 +259,19 @@ export default function Dashboard() {
                             </div>
                         </div>
 
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">NIK (Nomor Induk Karyawan)</label>
+                            <div className="relative flex items-center">
+                                <ShieldCheck className="absolute left-3 w-5 h-5 text-accent/70" />
+                                <input
+                                    name="nik"
+                                    value={formData.nik}
+                                    readOnly
+                                    className="input-field pl-16 pr-4 bg-white/5 opacity-70 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-1">Kelas</label>
@@ -260,6 +312,42 @@ export default function Dashboard() {
                                 />
                             </div>
                         </div>
+
+                        {profile?.role === 'kepsek' && (
+                            <div className="pt-2">
+                                <label className="block text-sm font-medium text-gray-400 mb-2 flex justify-between items-center">
+                                    <span>Lampiran PDF (Opsional)</span>
+                                    {file && <span className="text-[10px] text-accent uppercase font-bold px-2 py-0.5 bg-accent/10 rounded">Terpilih</span>}
+                                </label>
+                                <div className={`relative flex items-center p-4 border-2 border-dashed rounded-xl transition-all ${file ? 'border-accent/40 bg-accent/5' : 'border-white/10 hover:border-white/20'}`}>
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={(e) => setFile(e.target.files[0])}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    />
+                                    <div className="flex items-center gap-4 w-full">
+                                        <div className={`p-3 rounded-lg ${file ? 'bg-accent/20 text-accent' : 'bg-white/5 text-gray-500'}`}>
+                                            {file ? <Paperclip size={24} /> : <FileUp size={24} />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-sm font-medium truncate ${file ? 'text-white' : 'text-gray-500'}`}>
+                                                {file ? file.name : 'Pilih file PDF lampiran...'}
+                                            </p>
+                                            <p className="text-[10px] text-gray-600 uppercase tracking-wider">Maksimal 5MB • Hanya PDF</p>
+                                        </div>
+                                        {file && (
+                                            <button
+                                                onClick={(e) => { e.preventDefault(); setFile(null); }}
+                                                className="z-20 p-2 hover:bg-red-500/10 text-gray-500 hover:text-red-500 rounded-lg transition-colors"
+                                            >
+                                                <LogOut size={16} className="rotate-90" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <button
