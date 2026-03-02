@@ -40,7 +40,7 @@ export default function Dashboard() {
                 name: profile.full_name || '',
                 nik: profile.nik || '',
                 unit: profile.unit_name || 'SMK Mitra Industri MM2100',
-                class: profile.default_class || ''
+                class: profile.default_class || (profile.role === 'kepsek' ? 'Semua Kelas' : '')
             }));
         }
     }, [profile]);
@@ -355,7 +355,9 @@ export default function Dashboard() {
                         disabled={loading || !formData.class || !formData.subject}
                         className={`w-full mt-8 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all ${savedId
                             ? 'bg-green-500/20 text-green-500 border border-green-500/50'
-                            : 'bg-accent hover:bg-accent-hover text-black'
+                            : (loading || !formData.class || !formData.subject)
+                                ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed border border-white/5'
+                                : 'bg-accent hover:bg-accent-hover text-black shadow-lg shadow-accent/20'
                             }`}
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : (savedId ? <CheckCircle size={20} /> : <Save size={20} />)}
