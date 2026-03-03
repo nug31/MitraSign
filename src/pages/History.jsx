@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
-import { motion } from 'framer-motion';
-import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
+import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip, QrCode, X, Download } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function History() {
@@ -13,6 +14,7 @@ export default function History() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [targetProfile, setTargetProfile] = useState(null);
+    const [selectedSig, setSelectedSig] = useState(null);
 
     // Get target user from URL or fallback to current user
     const targetUserId = searchParams.get('user') || user?.id;
@@ -72,6 +74,48 @@ export default function History() {
         s.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.class_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const downloadQr = (sig) => {
+        const svg = document.getElementById(`qr-${sig.id}`);
+        if (!svg) return;
+
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const qrImg = new Image();
+        const logoImg = new Image();
+
+        let loadedCount = 0;
+        const handleLoad = () => {
+            loadedCount++;
+            if (loadedCount === 2) {
+                canvas.width = qrImg.width;
+                canvas.height = qrImg.height;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(qrImg, 0, 0);
+                const logoSize = 40;
+                const x = (canvas.width - logoSize) / 2;
+                const y = (canvas.height - logoSize) / 2;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x, y, logoSize, logoSize);
+                ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+
+                const pngFile = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.download = `QR_History_${sig.subject}.png`;
+                downloadLink.href = pngFile;
+                downloadLink.click();
+            }
+        };
+
+        qrImg.onload = handleLoad;
+        logoImg.onload = handleLoad;
+        qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        logoImg.src = '/logo.png';
+    };
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -148,6 +192,13 @@ export default function History() {
                             </div>
                             <div className="flex items-center gap-2 w-full md:w-auto">
                                 <button
+                                    onClick={() => setSelectedSig(sig)}
+                                    className="flex-1 md:flex-none p-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg flex items-center justify-center gap-2 text-sm px-4 border border-accent/20"
+                                >
+                                    <QrCode size={16} />
+                                    Lihat QR
+                                </button>
+                                <button
                                     onClick={() => window.open(`${window.location.origin}/#/verify?id=${sig.id}`, '_blank')}
                                     className="flex-1 md:flex-none p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg flex items-center justify-center gap-2 text-sm px-4"
                                 >
@@ -156,7 +207,7 @@ export default function History() {
                                 </button>
                                 <button
                                     onClick={() => deleteSignature(sig.id)}
-                                    className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors"
+                                    className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors border border-red-500/10"
                                 >
                                     <Trash2 size={16} />
                                 </button>
@@ -169,6 +220,63 @@ export default function History() {
                     <p className="text-gray-500 italic">Belum ada riwayat tanda tangan yang ditemukan.</p>
                 </div>
             )}
+
+            <AnimatePresence>
+                {/* QR Viewer Modal */}
+                {selectedSig && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedSig(null)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative max-w-sm w-full glass-card p-8 flex flex-col items-center"
+                        >
+                            <button
+                                onClick={() => setSelectedSig(null)}
+                                className="absolute top-4 right-4 p-2 text-gray-500 hover:text-white transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+
+                            <h3 className="text-xl font-bold text-white mb-2 text-center">{selectedSig.subject}</h3>
+                            <p className="text-sm text-gray-400 mb-6">{selectedSig.class_name} • {selectedSig.date_signed}</p>
+
+                            <div className="bg-white p-4 rounded-2xl mb-8">
+                                <QRCodeSVG
+                                    id={`qr-${selectedSig.id}`}
+                                    value={`${window.location.origin}/#/verify?id=${selectedSig.id}`}
+                                    size={220}
+                                    level="H"
+                                    includeMargin={true}
+                                    imageSettings={{
+                                        src: "/logo.png",
+                                        x: undefined,
+                                        y: undefined,
+                                        height: 35,
+                                        width: 35,
+                                        excavate: true,
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                onClick={() => downloadQr(selectedSig)}
+                                className="w-full btn-primary flex items-center justify-center gap-2 py-3"
+                            >
+                                <Download size={18} />
+                                Download QR Code
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
