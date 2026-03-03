@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip, QrCode, X, Download } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 export default function History() {
     const { user, profile } = useAuthStore();
@@ -277,6 +278,7 @@ export default function History() {
                     </div>
                 )}
             </AnimatePresence>
+            <Footer />
         </div>
     );
 }

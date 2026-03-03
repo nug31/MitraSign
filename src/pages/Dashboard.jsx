@@ -5,6 +5,7 @@ import { QrCode, User, School, Calendar, FileText, Download, Share2, LogOut, His
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 export default function Dashboard() {
     const { user, profile, signOut, fetchProfile } = useAuthStore();
@@ -484,6 +485,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </motion.div>
+            <Footer />
         </div>
     );
 }
