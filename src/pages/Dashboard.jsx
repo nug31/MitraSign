@@ -23,7 +23,7 @@ export default function Dashboard() {
         name: '',
         nik: '',
         class: '',
-        subject: 'Rapor Sumatif Tengah Semester Gasal T.A 2025-2026',
+        subject: 'Rapor Sumatif Tengah Semester Genap T.P 2025-2026',
         date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
         unit: 'SMK Mitra Industri MM2100'
     });
@@ -174,6 +174,7 @@ export default function Dashboard() {
         const svg = document.getElementById('qr-code-svg');
         if (!svg) return;
 
+        const scale = 4; // 4x scale for HD quality (250px → 1000px)
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -186,16 +187,17 @@ export default function Dashboard() {
         const handleLoad = () => {
             loadedCount++;
             if (loadedCount === 2) {
-                canvas.width = qrImg.width;
-                canvas.height = qrImg.height;
+                canvas.width = qrImg.naturalWidth * scale;
+                canvas.height = qrImg.naturalHeight * scale;
+                ctx.imageSmoothingEnabled = false;
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(qrImg, 0, 0);
-                const logoSize = 40;
+                ctx.drawImage(qrImg, 0, 0, canvas.width, canvas.height);
+                const logoSize = 40 * scale;
                 const x = (canvas.width - logoSize) / 2;
                 const y = (canvas.height - logoSize) / 2;
                 ctx.fillStyle = 'white';
-                ctx.fillRect(x, y, logoSize, logoSize);
+                ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
                 ctx.drawImage(logoImg, x, y, logoSize, logoSize);
 
                 const pngFile = canvas.toDataURL('image/png');
@@ -219,7 +221,7 @@ export default function Dashboard() {
             {/* Header / Navbar replacement */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 glass-card p-4 rounded-2xl">
                 <div className="flex items-center gap-3">
-                    <QrCode className="text-accent w-8 h-8" />
+                    <img src="/favicon.png" alt="Logo" className="w-10 h-10 object-contain" />
                     <div>
                         <h1 className="text-xl font-bold text-white">MitraSign</h1>
                         <p className="text-xs text-gray-500">Digital Signature for Teachers</p>

@@ -80,6 +80,7 @@ export default function History() {
         const svg = document.getElementById(`qr-${sig.id}`);
         if (!svg) return;
 
+        const scale = 4; // 4x scale for HD quality (220px → 880px)
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -92,16 +93,17 @@ export default function History() {
         const handleLoad = () => {
             loadedCount++;
             if (loadedCount === 2) {
-                canvas.width = qrImg.width;
-                canvas.height = qrImg.height;
+                canvas.width = qrImg.naturalWidth * scale;
+                canvas.height = qrImg.naturalHeight * scale;
+                ctx.imageSmoothingEnabled = false;
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(qrImg, 0, 0);
-                const logoSize = 40;
+                ctx.drawImage(qrImg, 0, 0, canvas.width, canvas.height);
+                const logoSize = 35 * scale;
                 const x = (canvas.width - logoSize) / 2;
                 const y = (canvas.height - logoSize) / 2;
                 ctx.fillStyle = 'white';
-                ctx.fillRect(x, y, logoSize, logoSize);
+                ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
                 ctx.drawImage(logoImg, x, y, logoSize, logoSize);
 
                 const pngFile = canvas.toDataURL('image/png');
