@@ -24,7 +24,7 @@ export default function Dashboard() {
         nik: '',
         class: '',
         subject: 'Rapor Sumatif Tengah Semester Genap T.P 2025-2026',
-        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        date: '12 Maret 2026',
         unit: 'SMK Mitra Industri MM2100'
     });
 
