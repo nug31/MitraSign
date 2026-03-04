@@ -71,7 +71,7 @@ export default function Footer() {
                 {/* Copyright */}
                 <div className="mt-6 pt-4 border-t border-white/5 text-center">
                     <p className="text-[10px] text-gray-600 uppercase tracking-[0.2em]">
-                        © {new Date().getFullYear()} MitraSign — SMK Mitra Industri MM2100 · All rights reserved
+                        © {new Date().getFullYear()} MitraSign — SMK Mitra Industri · All rights reserved
                     </p>
                 </div>
             </div>

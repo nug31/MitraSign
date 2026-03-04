@@ -31,7 +31,7 @@ export default function Dashboard() {
         class: '',
         subject: 'Rapor Sumatif Tengah Semester Genap T.P 2025-2026',
         date: '12 Maret 2026',
-        unit: 'SMK Mitra Industri MM2100'
+        unit: ''
     });
 
     const [qrUrl, setQrUrl] = useState('');
@@ -48,11 +48,22 @@ export default function Dashboard() {
                 ...prev,
                 name: profile.full_name || '',
                 nik: profile.nik || '',
-                unit: profile.unit_name || 'SMK Mitra Industri MM2100',
+                unit: profile.unit_name || '',
                 class: profile.default_class || (profile.role === 'kepsek' ? 'Semua Kelas' : '')
             }));
         }
     }, [profile]);
+
+    useEffect(() => {
+        if (profile && user?.user_metadata?.unit_name && profile.unit_name !== user.user_metadata.unit_name) {
+            // Self-healing: Update profile to match the unit_name chosen during registration
+            supabase
+                .from('profiles')
+                .update({ unit_name: user.user_metadata.unit_name })
+                .eq('id', user.id)
+                .then(() => fetchProfile(user.id));
+        }
+    }, [profile, user, fetchProfile]);
 
     useEffect(() => {
         if (savedId) {
@@ -112,7 +123,8 @@ export default function Dashboard() {
                     .insert([{
                         id: user.id,
                         full_name: user.user_metadata?.full_name || 'Anonymous Walas',
-                        unit_name: 'SMK Mitra Industri MM2100'
+                        nik: user.user_metadata?.nik || '',
+                        unit_name: user.user_metadata?.unit_name || 'SMK Mitra Industri MM2100'
                     }]);
 
                 if (createError) {
