@@ -217,39 +217,35 @@ export default function Dashboard() {
     if (!user) return null;
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-            {/* Header / Navbar replacement */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 glass-card p-4 rounded-2xl">
-                <div className="flex items-center gap-3">
-                    <img src="/favicon.png" alt="Logo" className="w-10 h-10 object-contain" />
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
+            {/* Header / Navbar */}
+            <div className="flex flex-row justify-between items-center mb-6 gap-3 glass-card p-3 sm:p-4 rounded-2xl">
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <img src="/favicon.png" alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                     <div>
-                        <h1 className="text-xl font-bold text-white">MitraSign</h1>
-                        <p className="text-xs text-gray-500">Digital Signature for Teachers</p>
+                        <h1 className="text-base sm:text-xl font-bold text-white">MitraSign</h1>
+                        <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">Digital Signature for Teachers</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                     <button
                         onClick={() => navigate('/history')}
-                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400 hover:text-white transition-colors"
                     >
-                        <History size={18} />
-                        History
+                        <History size={16} />
+                        <span className="hidden sm:inline">History</span>
                     </button>
                     {profile?.role === 'admin' && (
-                        <>
-                            <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
-                            <button
-                                onClick={() => navigate('/admin')}
-                                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
-                            >
-                                <ShieldCheck size={18} />
-                                Admin Panel
-                            </button>
-                        </>
+                        <button
+                            onClick={() => navigate('/admin')}
+                            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 px-2 py-1.5 rounded-lg border border-blue-500/20"
+                        >
+                            <ShieldCheck size={14} />
+                            <span className="hidden sm:inline">Admin</span>
+                        </button>
                     )}
-                    <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
-                    <div className="flex items-center gap-3">
-                        <div className="text-right">
+                    <div className="flex items-center gap-2">
+                        <div className="text-right hidden sm:block">
                             <p className="text-sm font-semibold text-white">{profile?.full_name}</p>
                             <p className="text-[10px] text-gray-500 uppercase">{profile?.role}</p>
                         </div>
@@ -258,7 +254,7 @@ export default function Dashboard() {
                             className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors"
                             title="Sign Out"
                         >
-                            <LogOut size={18} />
+                            <LogOut size={16} />
                         </button>
                     </div>
                 </div>
@@ -267,7 +263,7 @@ export default function Dashboard() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col md:flex-row gap-8"
+                className="flex flex-col md:flex-row gap-4 sm:gap-8"
             >
                 {/* Input Section */}
                 <div className="flex-1 glass-card">
@@ -420,16 +416,16 @@ export default function Dashboard() {
 
                 {/* QR Preview Section */}
                 <div className="w-full md:w-[400px]">
-                    <div className="glass-card sticky top-8 flex flex-col items-center">
-                        <h2 className="text-xl font-semibold mb-6">Preview MitraSign</h2>
+                    <div className="glass-card md:sticky md:top-8 flex flex-col items-center">
+                        <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Preview MitraSign</h2>
 
-                        <div className={`p-4 rounded-3xl shadow-2xl mb-6 relative group transform transition-all duration-300 ${savedId ? 'bg-white scale-105' : 'bg-white/10 grayscale opacity-50 shadow-none'}`}>
+                        <div className={`p-3 sm:p-4 rounded-3xl shadow-2xl mb-4 sm:mb-6 relative group transform transition-all duration-300 ${savedId ? 'bg-white scale-100 sm:scale-105' : 'bg-white/10 grayscale opacity-50 shadow-none'}`}>
                             {savedId ? (
                                 <>
                                     <QRCodeSVG
                                         id="qr-code-svg"
                                         value={qrUrl}
-                                        size={250}
+                                        size={Math.min(window.innerWidth - 120, 250)}
                                         level="H"
                                         includeMargin={true}
                                         imageSettings={{
@@ -446,8 +442,8 @@ export default function Dashboard() {
                                     </div>
                                 </>
                             ) : (
-                                <div className="w-[250px] h-[250px] flex items-center justify-center border-4 border-dashed border-white/20 rounded-2xl">
-                                    <p className="text-gray-500 text-xs text-center px-8 font-medium italic">
+                                <div className="w-[220px] sm:w-[250px] h-[220px] sm:h-[250px] flex items-center justify-center border-4 border-dashed border-white/20 rounded-2xl">
+                                    <p className="text-gray-500 text-xs text-center px-6 font-medium italic">
                                         Klik tombol "Generate Signature" untuk melihat QR Code yang valid
                                     </p>
                                 </div>
@@ -458,8 +454,8 @@ export default function Dashboard() {
                             <button
                                 onClick={downloadQr}
                                 disabled={!savedId}
-                                className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${savedId
-                                    ? 'bg-white/10 hover:bg-white/20 text-white'
+                                className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all text-sm sm:text-base ${savedId
+                                    ? 'bg-white/10 hover:bg-white/20 text-white active:scale-95'
                                     : 'bg-white/5 text-gray-600 cursor-not-allowed'
                                     }`}
                             >
@@ -469,8 +465,8 @@ export default function Dashboard() {
                             <button
                                 onClick={() => window.open(qrUrl, '_blank')}
                                 disabled={!savedId}
-                                className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${savedId
-                                    ? 'bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30'
+                                className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all text-sm sm:text-base ${savedId
+                                    ? 'bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 active:scale-95'
                                     : 'bg-white/5 text-gray-600 cursor-not-allowed'
                                     }`}
                             >
@@ -480,7 +476,7 @@ export default function Dashboard() {
                         </div>
 
                         {savedId && (
-                            <p className="text-xs text-center text-green-500/70 mt-6 font-medium">
+                            <p className="text-xs text-center text-green-500/70 mt-4 sm:mt-6 font-medium">
                                 QR Code ini berisi ID Unik yang terdaftar secara resmi.
                             </p>
                         )}

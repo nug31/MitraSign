@@ -121,17 +121,18 @@ export default function History() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <div className="flex items-center justify-between mb-8">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
                 <button
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                    className="flex items-center gap-1 sm:gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                 >
-                    <ArrowLeft size={20} />
-                    Kembali ke Dashboard
+                    <ArrowLeft size={18} />
+                    <span className="hidden sm:inline">Kembali ke Dashboard</span>
+                    <span className="sm:hidden">Kembali</span>
                 </button>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                    <HistoryIcon className="text-accent" />
+                <h1 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                    <HistoryIcon className="text-accent" size={20} />
                     Riwayat Tanda Tangan
                 </h1>
             </div>
@@ -193,26 +194,26 @@ export default function History() {
                                     )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 w-full md:w-auto">
+                            <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
                                 <button
                                     onClick={() => setSelectedSig(sig)}
-                                    className="flex-1 md:flex-none p-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg flex items-center justify-center gap-2 text-sm px-4 border border-accent/20"
+                                    className="flex-1 md:flex-none p-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg flex items-center justify-center gap-1 text-xs sm:text-sm px-3 sm:px-4 border border-accent/20"
                                 >
-                                    <QrCode size={16} />
+                                    <QrCode size={14} />
                                     Lihat QR
                                 </button>
                                 <button
                                     onClick={() => window.open(`${window.location.origin}/#/verify?id=${sig.id}`, '_blank')}
-                                    className="flex-1 md:flex-none p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg flex items-center justify-center gap-2 text-sm px-4"
+                                    className="flex-1 md:flex-none p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg flex items-center justify-center gap-1 text-xs sm:text-sm px-3 sm:px-4"
                                 >
-                                    <ExternalLink size={16} />
+                                    <ExternalLink size={14} />
                                     Cek
                                 </button>
                                 <button
                                     onClick={() => deleteSignature(sig.id)}
                                     className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors border border-red-500/10"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={15} />
                                 </button>
                             </div>
                         </motion.div>
@@ -239,23 +240,23 @@ export default function History() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative max-w-sm w-full glass-card p-8 flex flex-col items-center"
+                            className="relative max-w-sm w-full glass-card p-5 sm:p-8 flex flex-col items-center mx-3"
                         >
                             <button
                                 onClick={() => setSelectedSig(null)}
-                                className="absolute top-4 right-4 p-2 text-gray-500 hover:text-white transition-colors"
+                                className="absolute top-3 right-3 p-2 text-gray-500 hover:text-white transition-colors"
                             >
                                 <X size={20} />
                             </button>
 
-                            <h3 className="text-xl font-bold text-white mb-2 text-center">{selectedSig.subject}</h3>
-                            <p className="text-sm text-gray-400 mb-6">{selectedSig.class_name} • {selectedSig.date_signed}</p>
+                            <h3 className="text-base sm:text-xl font-bold text-white mb-1 text-center pr-6">{selectedSig.subject}</h3>
+                            <p className="text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">{selectedSig.class_name} • {selectedSig.date_signed}</p>
 
-                            <div className="bg-white p-4 rounded-2xl mb-8">
+                            <div className="bg-white p-3 sm:p-4 rounded-2xl mb-5 sm:mb-8">
                                 <QRCodeSVG
                                     id={`qr-${selectedSig.id}`}
                                     value={`${window.location.origin}/#/verify?id=${selectedSig.id}`}
-                                    size={220}
+                                    size={Math.min(window.innerWidth - 140, 220)}
                                     level="H"
                                     includeMargin={true}
                                     imageSettings={{
