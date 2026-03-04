@@ -239,7 +239,7 @@ export default function Dashboard() {
             {/* Header / Navbar */}
             <div className="flex flex-row justify-between items-center mb-6 gap-3 glass-card p-3 sm:p-4 rounded-2xl">
                 <div className="flex items-center gap-2 sm:gap-3">
-                    <img src={getLogo()} alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                    <img src="/favicon.png" alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                     <div>
                         <h1 className="text-base sm:text-xl font-bold text-white">MitraSign</h1>
                         <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">Digital Signature for Teachers</p>
