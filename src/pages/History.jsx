@@ -17,6 +17,12 @@ export default function History() {
     const [targetProfile, setTargetProfile] = useState(null);
     const [selectedSig, setSelectedSig] = useState(null);
 
+    const getLogo = () => {
+        const hostProfile = targetProfile || profile;
+        if (hostProfile?.unit_name?.includes('03')) return '/logo03.png';
+        return '/logo.png';
+    };
+
     // Get target user from URL or fallback to current user
     const targetUserId = searchParams.get('user') || user?.id;
 
@@ -59,15 +65,20 @@ export default function History() {
     const deleteSignature = async (id) => {
         if (!confirm('Yakin ingin menghapus riwayat tanda tangan ini? QR Code yang sudah dicetak tidak akan bisa diverifikasi lagi.')) return;
 
-        const { error } = await supabase
+        const { error, count } = await supabase
             .from('signatures')
-            .delete()
-            .eq('id', id);
+            .delete({ count: 'exact' })
+            .eq('id', id)
+            .eq('created_by', user.id);
+
+        console.log('Delete result:', { error, count });
 
         if (error) {
             alert('Gagal menghapus: ' + error.message);
+        } else if (count === 0) {
+            alert('Hapus diblokir oleh sistem (RLS Policy). Silakan atur izin DELETE di Supabase Dashboard → Table Editor → signatures → RLS Policies.');
         } else {
-            setSignatures(signatures.filter(s => s.id !== id));
+            setSignatures(prev => prev.filter(s => s.id !== id));
         }
     };
 
@@ -117,7 +128,7 @@ export default function History() {
         qrImg.onload = handleLoad;
         logoImg.onload = handleLoad;
         qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        logoImg.src = '/logo.png';
+        logoImg.src = getLogo();
     };
 
     return (
@@ -260,7 +271,7 @@ export default function History() {
                                     level="H"
                                     includeMargin={true}
                                     imageSettings={{
-                                        src: "/logo.png",
+                                        src: getLogo(),
                                         x: undefined,
                                         y: undefined,
                                         height: 35,

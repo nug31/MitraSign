@@ -10,6 +10,12 @@ import Footer from '../components/Footer';
 export default function Dashboard() {
     const { user, profile, signOut, fetchProfile } = useAuthStore();
     const navigate = useNavigate();
+
+    // Dynamic logo based on profile unit_name
+    const getLogo = () => {
+        if (profile?.unit_name?.includes('03')) return '/logo03.png';
+        return '/logo.png';
+    };
     const [loading, setLoading] = useState(false);
     const [savedId, setSavedId] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -211,7 +217,7 @@ export default function Dashboard() {
         qrImg.onload = handleLoad;
         logoImg.onload = handleLoad;
         qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        logoImg.src = '/logo.png';
+        logoImg.src = getLogo();
     };
 
     if (!user) return null;
@@ -221,7 +227,7 @@ export default function Dashboard() {
             {/* Header / Navbar */}
             <div className="flex flex-row justify-between items-center mb-6 gap-3 glass-card p-3 sm:p-4 rounded-2xl">
                 <div className="flex items-center gap-2 sm:gap-3">
-                    <img src="/favicon.png" alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                    <img src={getLogo()} alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                     <div>
                         <h1 className="text-base sm:text-xl font-bold text-white">MitraSign</h1>
                         <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">Digital Signature for Teachers</p>
@@ -429,7 +435,7 @@ export default function Dashboard() {
                                         level="H"
                                         includeMargin={true}
                                         imageSettings={{
-                                            src: "/logo.png",
+                                            src: getLogo(),
                                             x: undefined,
                                             y: undefined,
                                             height: 40,

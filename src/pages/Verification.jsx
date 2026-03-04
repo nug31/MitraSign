@@ -154,12 +154,16 @@ export default function Verification() {
 
                         <div className="border-t border-white/10 pt-6 mt-6">
                             <div className="flex items-center gap-3">
-                                <img src="/logo.png" alt="School Logo" className="w-10 h-10 object-contain" />
+                                <img
+                                    src={data.profiles?.unit_name?.includes('03') ? '/logo03.png' : '/logo.png'}
+                                    alt="School Logo"
+                                    className="w-10 h-10 object-contain"
+                                />
                                 <div>
                                     <p className="text-sm font-bold text-white">{data.profiles?.unit_name}</p>
                                     <div className="flex items-center gap-1 text-xs text-gray-500">
                                         <MapPin size={10} />
-                                        <span>Kawasan Industri MM2100</span>
+                                        <span>{data.profiles?.unit_name?.includes('03') ? 'Kabupaten Bekasi' : 'Kawasan Industri MM2100'}</span>
                                     </div>
                                 </div>
                             </div>
