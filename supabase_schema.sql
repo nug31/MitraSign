@@ -55,12 +55,13 @@ ON signatures FOR DELETE USING ((SELECT role FROM profiles WHERE id = auth.uid()
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, nik, unit_name)
+  INSERT INTO public.profiles (id, full_name, nik, unit_name, role)
   VALUES (
     new.id, 
     COALESCE(new.raw_user_meta_data->>'full_name', 'User Baru'), 
     new.raw_user_meta_data->>'nik',
-    'SMK Mitra Industri MM2100'
+    COALESCE(new.raw_user_meta_data->>'unit_name', 'SMK Mitra Industri MM2100'),
+    COALESCE(new.raw_user_meta_data->>'role', 'walas')
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN new;

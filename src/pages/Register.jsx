@@ -10,6 +10,7 @@ export default function Register() {
     const [fullName, setFullName] = useState('');
     const [nik, setNik] = useState('');
     const [unitName, setUnitName] = useState('SMK Mitra Industri MM2100');
+    const [role, setRole] = useState('walas');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function Register() {
                     full_name: fullName,
                     nik: nik,
                     unit_name: unitName,
+                    role: role,
                 }
             }
         });
@@ -65,19 +67,37 @@ export default function Register() {
                 )}
 
                 <form onSubmit={handleRegister} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1 font-bold">Unit Sekolah</label>
-                        <div className="relative flex items-center">
-                            <School className="absolute left-3 w-5 h-5 text-accent/70" />
-                            <select
-                                value={unitName}
-                                onChange={(e) => setUnitName(e.target.value)}
-                                className="input-field pl-12 pr-4 appearance-none cursor-pointer hover:border-accent/30 transition-all font-medium"
-                                required
-                            >
-                                <option value="SMK Mitra Industri MM2100" className="bg-slate-900">SMK Mitra Industri MM2100</option>
-                                <option value="SMK Mitra Industri 03" className="bg-slate-900">SMK Mitra Industri 03</option>
-                            </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1 font-bold">Unit Sekolah</label>
+                            <div className="relative flex items-center">
+                                <School className="absolute left-3 w-5 h-5 text-accent/70" />
+                                <select
+                                    value={unitName}
+                                    onChange={(e) => setUnitName(e.target.value)}
+                                    className="input-field pl-10 pr-4 appearance-none cursor-pointer hover:border-accent/30 transition-all font-medium text-sm"
+                                    required
+                                >
+                                    <option value="SMK Mitra Industri MM2100" className="bg-slate-900">Unit MM2100</option>
+                                    <option value="SMK Mitra Industri 03" className="bg-slate-900">Unit 03</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1 font-bold">Jabatan</label>
+                            <div className="relative flex items-center">
+                                <User className="absolute left-3 w-5 h-5 text-accent/70" />
+                                <select
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="input-field pl-10 pr-4 appearance-none cursor-pointer hover:border-accent/30 transition-all font-medium text-sm"
+                                    required
+                                >
+                                    <option value="walas" className="bg-slate-900">Wali Kelas</option>
+                                    <option value="kepsek" className="bg-slate-900">Kepala Sekolah</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

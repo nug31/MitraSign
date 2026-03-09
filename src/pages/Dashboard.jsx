@@ -55,13 +55,22 @@ export default function Dashboard() {
     }, [profile]);
 
     useEffect(() => {
-        if (profile && user?.user_metadata?.unit_name && profile.unit_name !== user.user_metadata.unit_name) {
-            // Self-healing: Update profile to match the unit_name chosen during registration
-            supabase
-                .from('profiles')
-                .update({ unit_name: user.user_metadata.unit_name })
-                .eq('id', user.id)
-                .then(() => fetchProfile(user.id));
+        if (profile && user?.user_metadata) {
+            const metadata = user.user_metadata;
+            const needsUpdate = (metadata.unit_name && profile.unit_name !== metadata.unit_name) ||
+                (metadata.role && profile.role !== metadata.role);
+
+            if (needsUpdate) {
+                // Self-healing: Update profile to match the metadata from registration
+                supabase
+                    .from('profiles')
+                    .update({
+                        unit_name: metadata.unit_name || profile.unit_name,
+                        role: metadata.role || profile.role
+                    })
+                    .eq('id', user.id)
+                    .then(() => fetchProfile(user.id));
+            }
         }
     }, [profile, user, fetchProfile]);
 
@@ -122,9 +131,10 @@ export default function Dashboard() {
                     .from('profiles')
                     .insert([{
                         id: user.id,
-                        full_name: user.user_metadata?.full_name || 'Anonymous Walas',
+                        full_name: user.user_metadata?.full_name || 'Anonymous User',
                         nik: user.user_metadata?.nik || '',
-                        unit_name: user.user_metadata?.unit_name || 'SMK Mitra Industri MM2100'
+                        unit_name: user.user_metadata?.unit_name || 'SMK Mitra Industri MM2100',
+                        role: user.user_metadata?.role || 'walas'
                     }]);
 
                 if (createError) {
