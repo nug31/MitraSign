@@ -78,6 +78,22 @@ const AdminDashboard = () => {
 
             setWalas(walasWithCount);
 
+            // 3. Fetch Recent Signatures
+            const { data: recentData } = await supabase
+                .from('signatures')
+                .select(`
+                    id,
+                    subject,
+                    class_name,
+                    date_signed,
+                    created_at,
+                    profiles (full_name)
+                `)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            setRecentSignatures(recentData || []);
+
         } catch (error) {
             console.error('Error fetching admin data:', error);
         } finally {
@@ -163,6 +179,37 @@ const AdminDashboard = () => {
                         <h3 className="text-slate-400 font-medium">Signature Hari Ini</h3>
                         <p className="text-4xl font-bold mt-2">{stats.todaySignatures}</p>
                     </motion.div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="mb-8">
+                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <TrendingUp className="text-emerald-400" size={20} />
+                        Aktivitas Terbaru
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {recentSignatures.map((sig, idx) => (
+                            <motion.div
+                                key={sig.id}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="bg-slate-800/30 border border-white/5 p-4 rounded-xl hover:bg-slate-800/50 transition-colors"
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded uppercase font-bold tracking-wider">
+                                        {sig.class_name}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 font-medium">{sig.date_signed}</span>
+                                </div>
+                                <h4 className="font-bold text-white text-sm line-clamp-1 mb-1">{sig.subject}</h4>
+                                <p className="text-xs text-slate-400 flex items-center gap-1">
+                                    <Users size={12} className="text-slate-500" />
+                                    {sig.profiles?.full_name}
+                                </p>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Search & Walas List */}
