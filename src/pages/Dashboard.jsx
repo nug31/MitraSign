@@ -54,25 +54,6 @@ export default function Dashboard() {
         }
     }, [profile]);
 
-    useEffect(() => {
-        if (profile && user?.user_metadata) {
-            const metadata = user.user_metadata;
-            const needsUpdate = (metadata.unit_name && profile.unit_name !== metadata.unit_name) ||
-                (metadata.role && profile.role !== metadata.role);
-
-            if (needsUpdate) {
-                // Self-healing: Update profile to match the metadata from registration
-                supabase
-                    .from('profiles')
-                    .update({
-                        unit_name: metadata.unit_name || profile.unit_name,
-                        role: metadata.role || profile.role
-                    })
-                    .eq('id', user.id)
-                    .then(() => fetchProfile(user.id));
-            }
-        }
-    }, [profile, user, fetchProfile]);
 
     useEffect(() => {
         if (savedId) {
