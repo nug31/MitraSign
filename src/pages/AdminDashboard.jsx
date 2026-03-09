@@ -134,81 +134,63 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-slate-800/50 backdrop-blur-xl border border-white/10 p-6 rounded-2xl"
-                    >
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-blue-500/20 rounded-xl">
-                                <Users className="text-blue-400 w-6 h-6" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    {[
+                        { label: 'Total Walas', value: stats.totalWalas, icon: Users, color: 'blue' },
+                        { label: 'Total Tanda Tangan', value: stats.totalSignatures, icon: FileText, color: 'indigo' },
+                        { label: 'Signature Hari Ini', value: stats.todaySignatures, icon: ShieldCheck, color: 'emerald' }
+                    ].map((stat, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="bg-slate-800/40 border border-white/5 p-4 rounded-xl flex items-center gap-4 hover:bg-slate-800/60 transition-colors"
+                        >
+                            <div className={`p-3 rounded-lg flex-shrink-0 bg-slate-900/50`}>
+                                <stat.icon size={20} className={`text-${stat.color}-400`} />
                             </div>
-                            <TrendingUp className="text-green-400 w-5 h-5" />
-                        </div>
-                        <h3 className="text-slate-400 font-medium">Total Walas</h3>
-                        <p className="text-4xl font-bold mt-2">{stats.totalWalas}</p>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="bg-slate-800/50 backdrop-blur-xl border border-white/10 p-6 rounded-2xl"
-                    >
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-indigo-500/20 rounded-xl">
-                                <FileText className="text-indigo-400 w-6 h-6" />
+                            <div>
+                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{stat.label}</p>
+                                <p className="text-2xl font-bold text-white">{stat.value}</p>
                             </div>
-                        </div>
-                        <h3 className="text-slate-400 font-medium">Total Tanda Tangan</h3>
-                        <p className="text-4xl font-bold mt-2">{stats.totalSignatures}</p>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="bg-slate-800/50 backdrop-blur-xl border border-white/10 p-6 rounded-2xl"
-                    >
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-emerald-500/20 rounded-xl">
-                                <ShieldCheck className="text-emerald-400 w-6 h-6" />
-                            </div>
-                        </div>
-                        <h3 className="text-slate-400 font-medium">Signature Hari Ini</h3>
-                        <p className="text-4xl font-bold mt-2">{stats.todaySignatures}</p>
-                    </motion.div>
+                        </motion.div>
+                    ))}
                 </div>
 
                 {/* Recent Activity */}
-                <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <TrendingUp className="text-emerald-400" size={20} />
-                        Aktivitas Terbaru
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {recentSignatures.map((sig, idx) => (
+                <div className="mb-8 bg-slate-800/40 border border-white/5 rounded-2xl overflow-hidden">
+                    <div className="p-4 border-b border-white/5 bg-white/5">
+                        <h3 className="text-xs font-bold flex items-center gap-2 uppercase tracking-widest text-slate-400">
+                            <TrendingUp size={16} className="text-emerald-500" />
+                            Aktivitas Terbaru
+                        </h3>
+                    </div>
+                    <div className="divide-y divide-white/5">
+                        {recentSignatures.length > 0 ? recentSignatures.map((sig, idx) => (
                             <motion.div
                                 key={sig.id}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="bg-slate-800/30 border border-white/5 p-4 rounded-xl hover:bg-slate-800/50 transition-colors"
+                                className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between gap-4"
                             >
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded uppercase font-bold tracking-wider">
-                                        {sig.class_name}
-                                    </span>
-                                    <span className="text-[10px] text-slate-500 font-medium">{sig.date_signed}</span>
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold whitespace-nowrap">{sig.class_name}</span>
+                                        <h4 className="font-semibold text-white text-sm truncate">{sig.subject}</h4>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 flex items-center gap-1 uppercase tracking-tight">
+                                        <Users size={12} /> {sig.profiles?.full_name}
+                                    </p>
                                 </div>
-                                <h4 className="font-bold text-white text-sm line-clamp-1 mb-1">{sig.subject}</h4>
-                                <p className="text-xs text-slate-400 flex items-center gap-1">
-                                    <Users size={12} className="text-slate-500" />
-                                    {sig.profiles?.full_name}
-                                </p>
+                                <div className="text-right flex-shrink-0">
+                                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{sig.date_signed}</p>
+                                </div>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <div className="p-8 text-center text-slate-500 text-sm italic">Belum ada aktivitas tanda tangan</div>
+                        )}
                     </div>
                 </div>
 
