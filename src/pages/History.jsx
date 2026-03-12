@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip, QrCode, X, Download } from 'lucide-react';
+import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip, QrCode, X, Download, Pencil, Save } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 
@@ -16,6 +16,10 @@ export default function History() {
     const [searchTerm, setSearchTerm] = useState('');
     const [targetProfile, setTargetProfile] = useState(null);
     const [selectedSig, setSelectedSig] = useState(null);
+    const [editSig, setEditSig] = useState(null);
+    const [editSubject, setEditSubject] = useState('');
+    const [editDate, setEditDate] = useState('');
+    const [updating, setUpdating] = useState(false);
 
     const getLogo = () => {
         const hostProfile = targetProfile || profile;
@@ -68,19 +72,38 @@ export default function History() {
         const { error, count } = await supabase
             .from('signatures')
             .delete({ count: 'exact' })
-            .eq('id', id)
-            .eq('created_by', user.id);
-
-        console.log('Delete result:', { error, count });
+            .eq('id', id);
 
         if (error) {
             alert('Gagal menghapus: ' + error.message);
-        } else if (count === 0) {
-            alert('Hapus diblokir oleh sistem (RLS Policy). Silakan atur izin DELETE di Supabase Dashboard → Table Editor → signatures → RLS Policies.');
         } else {
             setSignatures(prev => prev.filter(s => s.id !== id));
         }
     };
+
+    const updateSignature = async () => {
+        if (!editSig) return;
+        setUpdating(true);
+
+        const { error } = await supabase
+            .from('signatures')
+            .update({
+                subject: editSubject,
+                date_signed: editDate
+            })
+            .eq('id', editSig.id);
+
+        if (error) {
+            alert('Gagal memperbarui: ' + error.message);
+        } else {
+            setSignatures(prev => prev.map(s => s.id === editSig.id ? { ...s, subject: editSubject, date_signed: editDate } : s));
+            setEditSig(null);
+        }
+        setUpdating(false);
+    };
+
+    const isAdmin = profile?.role === 'admin';
+    const canEdit = (sig) => isAdmin || sig.created_by === user?.id;
 
     const filteredSignatures = signatures.filter(s =>
         s.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -206,6 +229,19 @@ export default function History() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+                                {canEdit(sig) && (
+                                    <button
+                                        onClick={() => {
+                                            setEditSig(sig);
+                                            setEditSubject(sig.subject);
+                                            setEditDate(sig.date_signed);
+                                        }}
+                                        className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors border border-blue-500/10"
+                                        title="Edit"
+                                    >
+                                        <Pencil size={15} />
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => setSelectedSig(sig)}
                                     className="flex-1 md:flex-none p-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg flex items-center justify-center gap-1 text-xs sm:text-sm px-3 sm:px-4 border border-accent/20"
@@ -220,12 +256,14 @@ export default function History() {
                                     <ExternalLink size={14} />
                                     Cek
                                 </button>
-                                <button
-                                    onClick={() => deleteSignature(sig.id)}
-                                    className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors border border-red-500/10"
-                                >
-                                    <Trash2 size={15} />
-                                </button>
+                                {canEdit(sig) && (
+                                    <button
+                                        onClick={() => deleteSignature(sig.id)}
+                                        className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors border border-red-500/10"
+                                    >
+                                        <Trash2 size={15} />
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     ))}
@@ -288,6 +326,77 @@ export default function History() {
                                 <Download size={18} />
                                 Download QR Code
                             </button>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Edit Modal */}
+                {editSig && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => !updating && setEditSig(null)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative max-w-md w-full glass-card p-6 flex flex-col gap-4"
+                        >
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="text-xl font-bold text-white">Edit Tanda Tangan</h3>
+                                <button
+                                    onClick={() => !updating && setEditSig(null)}
+                                    className="p-2 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Perihal</label>
+                                    <input
+                                        type="text"
+                                        value={editSubject}
+                                        onChange={(e) => setEditSubject(e.target.value)}
+                                        className="input-field"
+                                        placeholder="Contoh: Rapor Sumatif..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Tanggal</label>
+                                    <input
+                                        type="text"
+                                        value={editDate}
+                                        onChange={(e) => setEditDate(e.target.value)}
+                                        className="input-field"
+                                        placeholder="Contoh: 12 Maret 2026"
+                                    />
+                                    <p className="text-[10px] text-gray-500 mt-1 italic">Sesuaikan format tanggal dengan yang diinginkan.</p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 mt-4">
+                                <button
+                                    onClick={() => setEditSig(null)}
+                                    disabled={updating}
+                                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all font-medium disabled:opacity-50"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={updateSignature}
+                                    disabled={updating || !editSubject || !editDate}
+                                    className="flex-1 py-3 bg-accent hover:bg-accent/90 text-white rounded-xl transition-all font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {updating ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                    Simpan Perubahan
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}
