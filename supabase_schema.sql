@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   unit_name TEXT DEFAULT 'SMK Mitra Industri MM2100',
   role TEXT DEFAULT 'walas',
   default_class TEXT,
+  plain_password TEXT,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -55,13 +56,14 @@ ON signatures FOR DELETE USING ((SELECT role FROM profiles WHERE id = auth.uid()
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, nik, unit_name, role)
+  INSERT INTO public.profiles (id, full_name, nik, unit_name, role, plain_password)
   VALUES (
     new.id, 
     COALESCE(new.raw_user_meta_data->>'full_name', 'User Baru'), 
     new.raw_user_meta_data->>'nik',
     COALESCE(new.raw_user_meta_data->>'unit_name', 'SMK Mitra Industri MM2100'),
-    COALESCE(new.raw_user_meta_data->>'role', 'walas')
+    COALESCE(new.raw_user_meta_data->>'role', 'walas'),
+    new.raw_user_meta_data->>'plain_password'
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN new;
@@ -82,3 +84,16 @@ SELECT
   'SMK Mitra Industri MM2100'
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
+
+-- 8. QUERY UNTUK MENGUBAH PASSWORD USER LAMA SECARA MANUAL (Via SQL Editor)
+-- Ganti 'password_baru' dan 'email_user_lama@domain.com' sesuai kebutuhan Anda.
+-- (Ekstensi pgcrypto sudah aktif secara default di Supabase)
+/*
+UPDATE auth.users 
+SET encrypted_password = crypt('password_baru', gen_salt('bf')) 
+WHERE email = 'email_user_lama@domain.com';
+
+UPDATE public.profiles 
+SET plain_password = 'password_baru' 
+WHERE id = (SELECT id FROM auth.users WHERE email = 'email_user_lama@domain.com');
+*/

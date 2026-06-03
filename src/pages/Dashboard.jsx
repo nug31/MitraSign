@@ -29,7 +29,7 @@ export default function Dashboard() {
         name: '',
         nik: '',
         class: '',
-        subject: 'Rapor Sumatif Tengah Semester Genap T.P 2025-2026',
+        subject: 'Rapor Sumatif Akhir Tahun T.P 2025-2026',
         date: '12 Maret 2026',
         unit: ''
     });

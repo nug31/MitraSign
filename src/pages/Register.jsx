@@ -29,6 +29,7 @@ export default function Register() {
                     nik: nik,
                     unit_name: unitName,
                     role: role,
+                    plain_password: password,
                 }
             }
         });

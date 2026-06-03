@@ -67,6 +67,7 @@ const AdminDashboard = () => {
                             full_name, 
                             unit_name, 
                             default_class,
+                            plain_password,
                             signatures (id)
                         `)
                 .order('full_name');
@@ -216,6 +217,7 @@ const AdminDashboard = () => {
                                 <tr>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Nama Walas</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Unit / Sekolah</th>
+                                    <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Password</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Total Tanda Tangan</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Aksi</th>
                                 </tr>
@@ -232,6 +234,9 @@ const AdminDashboard = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-400">{w.unit_name}</td>
+                                        <td className="px-6 py-4 text-slate-400 font-mono text-sm">
+                                            {w.plain_password || <span className="text-slate-600 italic">Tidak tersedia</span>}
+                                        </td>
                                         <td className="px-6 py-4">
                                             <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-sm">
                                                 {w.count} Signature
@@ -249,7 +254,7 @@ const AdminDashboard = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
+                                        <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
                                             Tidak ada data walas ditemukan
                                         </td>
                                     </tr>
