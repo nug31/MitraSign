@@ -30,7 +30,7 @@ export default function Dashboard() {
         nik: '',
         class: '',
         subject: 'Rapor Sumatif Akhir Tahun T.P 2025-2026',
-        date: '12 Maret 2026',
+        date: '24 Juni 2026',
         unit: ''
     });
 
