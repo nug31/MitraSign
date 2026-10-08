@@ -97,3 +97,29 @@ UPDATE public.profiles
 SET plain_password = 'password_baru' 
 WHERE id = (SELECT id FROM auth.users WHERE email = 'email_user_lama@domain.com');
 */
+
+-- 9. RESET PASSWORD OLEH ADMIN (dipanggil dari Admin Panel via supabase.rpc)
+-- Jalankan sekali di SQL Editor Supabase.
+CREATE OR REPLACE FUNCTION public.admin_reset_password(target_user_id UUID, new_password TEXT)
+RETURNS void AS $$
+BEGIN
+  IF (SELECT role FROM public.profiles WHERE id = auth.uid()) IS DISTINCT FROM 'admin' THEN
+    RAISE EXCEPTION 'Hanya admin yang boleh mereset password';
+  END IF;
+  IF new_password IS NULL OR length(new_password) < 6 THEN
+    RAISE EXCEPTION 'Password minimal 6 karakter';
+  END IF;
+
+  UPDATE auth.users
+  SET encrypted_password = extensions.crypt(new_password, extensions.gen_salt('bf')),
+      updated_at = now()
+  WHERE id = target_user_id;
+
+  UPDATE public.profiles
+  SET plain_password = new_password
+  WHERE id = target_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth, extensions;
+
+REVOKE ALL ON FUNCTION public.admin_reset_password(UUID, TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_reset_password(UUID, TEXT) TO authenticated;

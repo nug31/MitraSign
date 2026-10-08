@@ -8,7 +8,8 @@ import {
     TrendingUp,
     ShieldCheck,
     ChevronRight,
-    Loader2
+    Loader2,
+    KeyRound
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -100,6 +101,25 @@ const AdminDashboard = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleResetPassword = async (w) => {
+        const newPassword = window.prompt(`Password baru untuk ${w.full_name} (minimal 6 karakter):`);
+        if (newPassword === null) return;
+        if (newPassword.length < 6) {
+            alert('Password minimal 6 karakter');
+            return;
+        }
+        const { error } = await supabase.rpc('admin_reset_password', {
+            target_user_id: w.id,
+            new_password: newPassword
+        });
+        if (error) {
+            alert(`Gagal reset password: ${error.message}`);
+            return;
+        }
+        setWalas(prev => prev.map(p => p.id === w.id ? { ...p, plain_password: newPassword } : p));
+        alert(`Password ${w.full_name} berhasil diubah`);
     };
 
     const filteredWalas = walas.filter(w =>
@@ -243,13 +263,22 @@ const AdminDashboard = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => navigate(`/history?user=${w.id}`)}
-                                                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
-                                            >
-                                                Lihat Detail
-                                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                            </button>
+                                            <div className="flex items-center gap-4">
+                                                <button
+                                                    onClick={() => navigate(`/history?user=${w.id}`)}
+                                                    className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+                                                >
+                                                    Lihat Detail
+                                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleResetPassword(w)}
+                                                    className="flex items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors"
+                                                >
+                                                    <KeyRound className="w-4 h-4" />
+                                                    Reset
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 )) : (
