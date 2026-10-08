@@ -123,3 +123,18 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth, extensions;
 
 REVOKE ALL ON FUNCTION public.admin_reset_password(UUID, TEXT) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_reset_password(UUID, TEXT) TO authenticated;
+
+-- 10. ADMIN MELIHAT EMAIL LOGIN USER (dipanggil dari Admin Panel via supabase.rpc)
+CREATE OR REPLACE FUNCTION public.admin_get_emails()
+RETURNS TABLE (id UUID, email TEXT) AS $$
+BEGIN
+  IF (SELECT role FROM public.profiles WHERE profiles.id = auth.uid()) IS DISTINCT FROM 'admin' THEN
+    RAISE EXCEPTION 'Hanya admin yang boleh melihat email';
+  END IF;
+  RETURN QUERY SELECT u.id, u.email::text FROM auth.users u;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth;
+
+REVOKE ALL ON FUNCTION public.admin_get_emails() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_get_emails() TO authenticated;
+NOTIFY pgrst, 'reload schema';

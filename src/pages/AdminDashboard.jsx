@@ -73,8 +73,12 @@ const AdminDashboard = () => {
                         `)
                 .order('full_name');
 
+            const { data: emailData } = await supabase.rpc('admin_get_emails');
+            const emailMap = Object.fromEntries((emailData || []).map(e => [e.id, e.email]));
+
             const walasWithCount = profilesData.map(p => ({
                 ...p,
+                email: emailMap[p.id],
                 count: p.signatures?.length || 0
             }));
 
@@ -237,6 +241,7 @@ const AdminDashboard = () => {
                                 <tr>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Nama Walas</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Unit / Sekolah</th>
+                                    <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Email Login</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Password</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Total Tanda Tangan</th>
                                     <th className="px-6 py-4 font-medium uppercase text-xs tracking-wider">Aksi</th>
@@ -254,6 +259,9 @@ const AdminDashboard = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-400">{w.unit_name}</td>
+                                        <td className="px-6 py-4 text-slate-400 font-mono text-sm">
+                                            {w.email || <span className="text-slate-600 italic">Tidak tersedia</span>}
+                                        </td>
                                         <td className="px-6 py-4 text-slate-400 font-mono text-sm">
                                             {w.plain_password || <span className="text-slate-600 italic">Tidak tersedia</span>}
                                         </td>
@@ -283,7 +291,7 @@ const AdminDashboard = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                                        <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
                                             Tidak ada data walas ditemukan
                                         </td>
                                     </tr>
