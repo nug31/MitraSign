@@ -137,4 +137,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth;
 
 REVOKE ALL ON FUNCTION public.admin_get_emails() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_get_emails() TO authenticated;
+
+-- 11. NAMA & NIK PENANDATANGAN PER DOKUMEN (diisi admin, mis. untuk surat pihak luar)
+ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_name TEXT;
+ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_nik TEXT;
 NOTIFY pgrst, 'reload schema';

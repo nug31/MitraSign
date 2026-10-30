@@ -16,6 +16,7 @@ export default function Dashboard() {
         if (profile?.unit_name?.includes('03')) return '/logo03.png';
         return '/logo.png';
     };
+    const isAdmin = profile?.role === 'admin';
     const canUploadPdf = ['kepsek', 'admin'].includes(profile?.role);
     const [loading, setLoading] = useState(false);
     const [savedId, setSavedId] = useState(null);
@@ -164,7 +165,9 @@ export default function Dashboard() {
                 class_name: formData.class,
                 date_signed: formData.date,
                 attachment_url: currentFileUrl,
-                attachment_name: currentFileName
+                attachment_name: currentFileName,
+                signer_name: isAdmin ? formData.name : null,
+                signer_nik: isAdmin ? formData.nik : null
             }])
             .select()
             .single();
@@ -290,14 +293,16 @@ export default function Dashboard() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Nama Penandatangan (Otomatis)</label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Nama Penandatangan{isAdmin ? '' : ' (Otomatis)'}</label>
                             <div className="relative flex items-center">
                                 <User className="absolute left-3 w-5 h-5 text-accent/70" />
                                 <input
                                     name="name"
                                     value={formData.name}
-                                    readOnly
-                                    className="input-field pl-16 pr-4 bg-white/5 opacity-70 cursor-not-allowed"
+                                    onChange={handleChange}
+                                    readOnly={!isAdmin}
+                                    className={`input-field pl-16 pr-4 ${isAdmin ? '' : 'bg-white/5 opacity-70 cursor-not-allowed'}`}
+                                    placeholder="Nama penandatangan..."
                                 />
                             </div>
                         </div>
@@ -305,7 +310,7 @@ export default function Dashboard() {
                         <div>
                             <label className="block text-sm font-medium text-gray-400 mb-1 flex justify-between items-center">
                                 <span>NIK (Nomor Induk Karyawan)</span>
-                                <button
+                                {!isAdmin && <button
                                     onClick={handleUpdateNik}
                                     disabled={updateNikLoading}
                                     className="text-[10px] text-accent flex items-center gap-1 hover:underline uppercase font-bold tracking-wider"
@@ -317,7 +322,7 @@ export default function Dashboard() {
                                     ) : (
                                         <><Edit2 size={12} /> {formData.nik ? 'Ubah' : 'Tambah'} NIK</>
                                     )}
-                                </button>
+                                </button>}
                             </label>
                             <div className="relative flex items-center">
                                 <ShieldCheck className="absolute left-3 w-5 h-5 text-accent/70" />
@@ -325,8 +330,8 @@ export default function Dashboard() {
                                     name="nik"
                                     value={formData.nik}
                                     onChange={handleChange}
-                                    readOnly={!isEditingNik}
-                                    className={`input-field pl-16 pr-4 transition-all ${!isEditingNik ? 'bg-white/5 opacity-70 cursor-not-allowed border-transparent' : 'bg-accent/5 border-accent/30 focus:border-accent shadow-[0_0_15px_-5px_theme(colors.accent.DEFAULT)]'}`}
+                                    readOnly={!isAdmin && !isEditingNik}
+                                    className={`input-field pl-16 pr-4 transition-all ${(isAdmin ? false : !isEditingNik) ? 'bg-white/5 opacity-70 cursor-not-allowed border-transparent' : 'bg-accent/5 border-accent/30 focus:border-accent shadow-[0_0_15px_-5px_theme(colors.accent.DEFAULT)]'}`}
                                     placeholder="Masukkan NIK Anda..."
                                 />
                             </div>
