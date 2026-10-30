@@ -16,6 +16,7 @@ export default function Dashboard() {
         if (profile?.unit_name?.includes('03')) return '/logo03.png';
         return '/logo.png';
     };
+    const canUploadPdf = ['kepsek', 'admin'].includes(profile?.role);
     const [loading, setLoading] = useState(false);
     const [savedId, setSavedId] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -130,7 +131,7 @@ export default function Dashboard() {
         let currentFileUrl = null;
         let currentFileName = null;
 
-        if (file && profile?.role === 'kepsek') {
+        if (file && canUploadPdf) {
             setUploading(true);
             const fileExt = file.name.split('.').pop();
             const filePath = `${user.id}/${Math.random()}.${fileExt}`;
@@ -191,23 +192,27 @@ export default function Dashboard() {
 
         const qrImg = new Image();
         const logoImg = new Image();
+        const withLogo = !fileUrl;
+        const needed = withLogo ? 2 : 1;
 
         let loadedCount = 0;
         const handleLoad = () => {
             loadedCount++;
-            if (loadedCount === 2) {
+            if (loadedCount === needed) {
                 canvas.width = qrImg.naturalWidth * scale;
                 canvas.height = qrImg.naturalHeight * scale;
                 ctx.imageSmoothingEnabled = false;
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(qrImg, 0, 0, canvas.width, canvas.height);
-                const logoSize = 40 * scale;
-                const x = (canvas.width - logoSize) / 2;
-                const y = (canvas.height - logoSize) / 2;
-                ctx.fillStyle = 'white';
-                ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
-                ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+                if (withLogo) {
+                    const logoSize = 40 * scale;
+                    const x = (canvas.width - logoSize) / 2;
+                    const y = (canvas.height - logoSize) / 2;
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
+                    ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+                }
 
                 const pngFile = canvas.toDataURL('image/png');
                 const downloadLink = document.createElement('a');
@@ -218,9 +223,11 @@ export default function Dashboard() {
         };
 
         qrImg.onload = handleLoad;
-        logoImg.onload = handleLoad;
         qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        logoImg.src = getLogo();
+        if (withLogo) {
+            logoImg.onload = handleLoad;
+            logoImg.src = getLogo();
+        }
     };
 
     if (!user) return null;
@@ -366,7 +373,7 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {profile?.role === 'kepsek' && (
+                        {canUploadPdf && (
                             <div className="pt-2">
                                 <label className="block text-sm font-medium text-gray-400 mb-2 flex justify-between items-center">
                                     <span>Lampiran PDF (Opsional)</span>
@@ -437,7 +444,7 @@ export default function Dashboard() {
                                         size={Math.min(window.innerWidth - 120, 250)}
                                         level="H"
                                         includeMargin={true}
-                                        imageSettings={{
+                                        imageSettings={fileUrl ? undefined : {
                                             src: getLogo(),
                                             x: undefined,
                                             y: undefined,
