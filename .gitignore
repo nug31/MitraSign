@@ -5,3 +5,5 @@ dist
 .env
 .npm
 .vite
+
+*.pdf
