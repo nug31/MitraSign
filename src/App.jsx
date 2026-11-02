@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import History from './pages/History';
 import AdminDashboard from './pages/AdminDashboard';
+import FormPeminjaman from './pages/FormPeminjaman';
+import QrLink from './pages/QrLink';
 
 function App() {
     const { setUser, fetchProfile, loading, setLoading } = useAuthStore();
@@ -52,6 +54,8 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/history" element={<History />} />
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/borrow-car" element={<FormPeminjaman />} />
+                    <Route path="/qr-link" element={<QrLink />} />
                 </Routes>
             </div>
         </Router>
