@@ -254,6 +254,13 @@ export default function Dashboard() {
                         <History size={16} />
                         <span className="hidden sm:inline">History</span>
                     </button>
+                    <button
+                        onClick={() => navigate('/qr-link')}
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400 hover:text-white transition-colors"
+                    >
+                        <QrCode size={16} />
+                        <span className="hidden sm:inline">QR Link</span>
+                    </button>
                     {profile?.role === 'admin' && (
                         <button
                             onClick={() => navigate('/admin')}
