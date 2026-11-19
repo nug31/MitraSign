@@ -80,6 +80,7 @@ export default function Register() {
                                     required
                                 >
                                     <option value="SMK Mitra Industri MM2100" className="bg-slate-900">Unit MM2100</option>
+                                    <option value="SMK Mitra Industri 02" className="bg-slate-900">Unit 02 (Pati)</option>
                                     <option value="SMK Mitra Industri 03" className="bg-slate-900">Unit 03</option>
                                 </select>
                             </div>

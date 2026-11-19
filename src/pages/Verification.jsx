@@ -103,7 +103,8 @@ export default function Verification() {
                                 <p className="text-sm text-gray-400">
                                     {data.signer_title || (data.profiles?.role === 'kepsek' ? 'Kepala Sekolah' : data.profiles?.role === 'admin' ? 'Administrator' : `Wali Kelas ${data.class_name}`)}
                                 </p>
-                                <p className="text-xs text-accent mt-1 uppercase font-bold tracking-wider">NIK. {(data.signer_name ? data.signer_nik : data.profiles?.nik) || '-'}</p>
+                                {data.signer_unit && <p className="text-sm text-gray-400">{data.signer_unit}</p>}
+                                <p className="text-xs text-accent mt-1 uppercase font-bold tracking-wider">{data.signer_id_type || 'NIK'}. {(data.signer_name ? data.signer_nik : data.profiles?.nik) || '-'}</p>
                             </div>
                         </div>
 

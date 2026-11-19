@@ -126,19 +126,21 @@ export default function History() {
         let loadedCount = 0;
         const handleLoad = () => {
             loadedCount++;
-            if (loadedCount === 2) {
+            if (loadedCount === (sig.signer_unit ? 1 : 2)) {
                 canvas.width = qrImg.naturalWidth * scale;
                 canvas.height = qrImg.naturalHeight * scale;
                 ctx.imageSmoothingEnabled = false;
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(qrImg, 0, 0, canvas.width, canvas.height);
-                const logoSize = 35 * scale;
-                const x = (canvas.width - logoSize) / 2;
-                const y = (canvas.height - logoSize) / 2;
-                ctx.fillStyle = 'white';
-                ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
-                ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+                if (!sig.signer_unit) {
+                    const logoSize = 35 * scale;
+                    const x = (canvas.width - logoSize) / 2;
+                    const y = (canvas.height - logoSize) / 2;
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
+                    ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+                }
 
                 const pngFile = canvas.toDataURL('image/png');
                 const downloadLink = document.createElement('a');
@@ -149,9 +151,11 @@ export default function History() {
         };
 
         qrImg.onload = handleLoad;
-        logoImg.onload = handleLoad;
         qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        logoImg.src = getLogo(sig);
+        if (!sig.signer_unit) {
+            logoImg.onload = handleLoad;
+            logoImg.src = getLogo(sig);
+        }
     };
 
     return (
@@ -308,7 +312,7 @@ export default function History() {
                                     size={Math.min(window.innerWidth - 140, 220)}
                                     level="H"
                                     includeMargin={true}
-                                    imageSettings={{
+                                    imageSettings={selectedSig.signer_unit ? undefined : {
                                         src: getLogo(selectedSig),
                                         x: undefined,
                                         y: undefined,

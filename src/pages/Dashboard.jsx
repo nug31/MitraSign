@@ -13,8 +13,7 @@ export default function Dashboard() {
     const navigate = useNavigate();
 
     // Dynamic logo based on profile unit_name
-    const getLogo = () => getCampus(formData.unit || profile?.unit_name).logo;
-    const isAdmin = profile?.role === 'admin';
+    const getLogo = () => getCampus(formData.unit || profile?.unit_name).logo;    const isAdmin = profile?.role === 'admin';
     const canUploadPdf = ['kepsek', 'admin'].includes(profile?.role);
     const [loading, setLoading] = useState(false);
     const [savedId, setSavedId] = useState(null);
@@ -29,11 +28,16 @@ export default function Dashboard() {
         name: '',
         nik: '',
         title: 'Kepala Sekolah',
+        signerUnit: '',
+        idType: 'NIK',
         class: '',
         subject: 'Rapor Sumatif Akhir Tahun T.P 2025-2026',
         date: '24 Juni 2026',
         unit: ''
     });
+
+    // Penandatangan dari luar sekolah (Unit Kerja diisi, mis. Kodim) -> QR tanpa logo kampus
+    const showLogo = !(isAdmin && formData.signerUnit.trim());
 
     const [qrUrl, setQrUrl] = useState('');
 
@@ -168,7 +172,9 @@ export default function Dashboard() {
                 signer_name: isAdmin ? formData.name : null,
                 signer_nik: isAdmin ? formData.nik : null,
                 unit_name: isAdmin ? formData.unit : null,
-                signer_title: isAdmin ? formData.title.trim() || null : null
+                signer_title: isAdmin ? formData.title.trim() || null : null,
+                signer_unit: isAdmin ? formData.signerUnit.trim() || null : null,
+                signer_id_type: isAdmin ? formData.idType : null
             }])
             .select()
             .single();
@@ -196,7 +202,7 @@ export default function Dashboard() {
 
         const qrImg = new Image();
         const logoImg = new Image();
-        const withLogo = !fileUrl;
+        const withLogo = showLogo;
         const needed = withLogo ? 2 : 1;
 
         let loadedCount = 0;
@@ -357,9 +363,40 @@ export default function Dashboard() {
                             </div>
                         )}
 
+                        {isAdmin && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Unit Kerja Penandatangan (Opsional)</label>
+                                    <div className="relative flex items-center">
+                                        <School className="absolute left-3 w-5 h-5 text-accent/70" />
+                                        <input
+                                            name="signerUnit"
+                                            value={formData.signerUnit}
+                                            onChange={handleChange}
+                                            className="input-field pl-16 pr-4"
+                                            placeholder="Contoh: Kodim 0718/PATI"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Jenis ID</label>
+                                    <select
+                                        name="idType"
+                                        value={formData.idType}
+                                        onChange={handleChange}
+                                        className="input-field px-4"
+                                    >
+                                        <option value="NIK" className="text-black">NIK</option>
+                                        <option value="NRP" className="text-black">NRP</option>
+                                        <option value="NIP" className="text-black">NIP</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium text-gray-400 mb-1 flex justify-between items-center">
-                                <span>NIK (Nomor Induk Karyawan)</span>
+                                <span>{isAdmin ? formData.idType : 'NIK (Nomor Induk Karyawan)'}</span>
                                 {!isAdmin && <button
                                     onClick={handleUpdateNik}
                                     disabled={updateNikLoading}
@@ -499,7 +536,7 @@ export default function Dashboard() {
                                         size={Math.min(window.innerWidth - 120, 250)}
                                         level="H"
                                         includeMargin={true}
-                                        imageSettings={fileUrl ? undefined : {
+                                        imageSettings={!showLogo ? undefined : {
                                             src: getLogo(),
                                             x: undefined,
                                             y: undefined,

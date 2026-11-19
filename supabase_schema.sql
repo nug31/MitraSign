@@ -148,3 +148,7 @@ ALTER TABLE signatures ADD COLUMN IF NOT EXISTS unit_name TEXT;
 
 -- 12. JABATAN PENANDATANGAN (diisi admin, tampil di halaman verifikasi)
 ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_title TEXT;
+
+-- 13. UNIT KERJA & JENIS ID PENANDATANGAN (diisi admin, mis. Kodim 0718/PATI, NRP)
+ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_unit TEXT;
+ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_id_type TEXT;
