@@ -53,7 +53,7 @@ export default function Dashboard() {
                 class: profile.default_class || (profile.role === 'kepsek' ? 'Semua Kelas' : '')
             }));
         }
-    }, [profile]);
+    }, [profile?.id]); // hanya isi ulang saat akun berganti, bukan tiap profil di-refresh (mis. pindah tab)
 
 
     useEffect(() => {
