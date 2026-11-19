@@ -145,3 +145,6 @@ NOTIFY pgrst, 'reload schema';
 
 -- 11. KAMPUS PER TANDA TANGAN (admin bisa memilih kampus saat membuat QR)
 ALTER TABLE signatures ADD COLUMN IF NOT EXISTS unit_name TEXT;
+
+-- 12. JABATAN PENANDATANGAN (diisi admin, tampil di halaman verifikasi)
+ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_title TEXT;

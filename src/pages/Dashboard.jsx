@@ -28,6 +28,7 @@ export default function Dashboard() {
     const [formData, setFormData] = useState({
         name: '',
         nik: '',
+        title: 'Kepala Sekolah',
         class: '',
         subject: 'Rapor Sumatif Akhir Tahun T.P 2025-2026',
         date: '24 Juni 2026',
@@ -166,7 +167,8 @@ export default function Dashboard() {
                 attachment_name: currentFileName,
                 signer_name: isAdmin ? formData.name : null,
                 signer_nik: isAdmin ? formData.nik : null,
-                unit_name: isAdmin ? formData.unit : null
+                unit_name: isAdmin ? formData.unit : null,
+                signer_title: isAdmin ? formData.title.trim() || null : null
             }])
             .select()
             .single();
@@ -331,6 +333,29 @@ export default function Dashboard() {
                                 />
                             </div>
                         </div>
+
+                        {isAdmin && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Jabatan</label>
+                                <div className="relative flex items-center">
+                                    <ShieldCheck className="absolute left-3 w-5 h-5 text-accent/70" />
+                                    <input
+                                        name="title"
+                                        list="jabatan-options"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        className="input-field pl-16 pr-4"
+                                        placeholder="Contoh: Kepala Sekolah"
+                                    />
+                                    <datalist id="jabatan-options">
+                                        <option value="Kepala Sekolah" />
+                                        <option value="Wakil Kepala Sekolah" />
+                                        <option value="Wali Kelas" />
+                                        <option value="Ketua Yayasan" />
+                                    </datalist>
+                                </div>
+                            </div>
+                        )}
 
                         <div>
                             <label className="block text-sm font-medium text-gray-400 mb-1 flex justify-between items-center">
