@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { History as HistoryIcon, ArrowLeft, ExternalLink, Trash2, Calendar, FileText, School, Search, Loader2, Paperclip, QrCode, X, Download, Pencil, Save } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { getCampus } from '../lib/campuses';
 
 export default function History() {
     const { user, profile } = useAuthStore();
@@ -21,10 +22,9 @@ export default function History() {
     const [editDate, setEditDate] = useState('');
     const [updating, setUpdating] = useState(false);
 
-    const getLogo = () => {
+    const getLogo = (sig) => {
         const hostProfile = targetProfile || profile;
-        if (hostProfile?.unit_name?.includes('03')) return '/logo03.png';
-        return '/logo.png';
+        return getCampus(sig?.unit_name || hostProfile?.unit_name).logo;
     };
 
     // Get target user from URL or fallback to current user
@@ -151,7 +151,7 @@ export default function History() {
         qrImg.onload = handleLoad;
         logoImg.onload = handleLoad;
         qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        logoImg.src = getLogo();
+        logoImg.src = getLogo(sig);
     };
 
     return (
@@ -309,7 +309,7 @@ export default function History() {
                                     level="H"
                                     includeMargin={true}
                                     imageSettings={{
-                                        src: getLogo(),
+                                        src: getLogo(selectedSig),
                                         x: undefined,
                                         y: undefined,
                                         height: 35,

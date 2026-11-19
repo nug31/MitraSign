@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, ShieldCheck, User, Calendar, FileText, School, MapPin, Loader2, AlertTriangle, ShieldAlert, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Footer from '../components/Footer';
+import { getCampus } from '../lib/campuses';
 
 export default function Verification() {
     const [searchParams] = useSearchParams();
@@ -155,15 +156,15 @@ export default function Verification() {
                         <div className="border-t border-white/10 pt-6 mt-6">
                             <div className="flex items-center gap-3">
                                 <img
-                                    src={data.profiles?.unit_name?.includes('03') ? '/logo03.png' : '/logo.png'}
+                                    src={getCampus(data.unit_name || data.profiles?.unit_name).logo}
                                     alt="School Logo"
                                     className="w-10 h-10 object-contain"
                                 />
                                 <div>
-                                    <p className="text-sm font-bold text-white">{data.profiles?.unit_name}</p>
+                                    <p className="text-sm font-bold text-white">{data.unit_name || data.profiles?.unit_name}</p>
                                     <div className="flex items-center gap-1 text-xs text-gray-500">
                                         <MapPin size={10} />
-                                        <span>{data.profiles?.unit_name?.includes('03') ? 'Kabupaten Bekasi' : 'Kawasan Industri MM2100'}</span>
+                                        <span>{getCampus(data.unit_name || data.profiles?.unit_name).location}</span>
                                     </div>
                                 </div>
                             </div>

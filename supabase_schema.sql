@@ -142,3 +142,6 @@ GRANT EXECUTE ON FUNCTION public.admin_get_emails() TO authenticated;
 ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_name TEXT;
 ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signer_nik TEXT;
 NOTIFY pgrst, 'reload schema';
+
+-- 11. KAMPUS PER TANDA TANGAN (admin bisa memilih kampus saat membuat QR)
+ALTER TABLE signatures ADD COLUMN IF NOT EXISTS unit_name TEXT;

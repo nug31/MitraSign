@@ -6,16 +6,14 @@ import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { CAMPUSES, getCampus } from '../lib/campuses';
 
 export default function Dashboard() {
     const { user, profile, signOut, fetchProfile } = useAuthStore();
     const navigate = useNavigate();
 
     // Dynamic logo based on profile unit_name
-    const getLogo = () => {
-        if (profile?.unit_name?.includes('03')) return '/logo03.png';
-        return '/logo.png';
-    };
+    const getLogo = () => getCampus(formData.unit || profile?.unit_name).logo;
     const isAdmin = profile?.role === 'admin';
     const canUploadPdf = ['kepsek', 'admin'].includes(profile?.role);
     const [loading, setLoading] = useState(false);
@@ -167,7 +165,8 @@ export default function Dashboard() {
                 attachment_url: currentFileUrl,
                 attachment_name: currentFileName,
                 signer_name: isAdmin ? formData.name : null,
-                signer_nik: isAdmin ? formData.nik : null
+                signer_nik: isAdmin ? formData.nik : null,
+                unit_name: isAdmin ? formData.unit : null
             }])
             .select()
             .single();
@@ -299,6 +298,25 @@ export default function Dashboard() {
                     </h2>
 
                     <div className="space-y-4">
+                        {isAdmin && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Kampus</label>
+                                <div className="relative flex items-center">
+                                    <School className="absolute left-3 w-5 h-5 text-accent/70" />
+                                    <select
+                                        name="unit"
+                                        value={getCampus(formData.unit).name}
+                                        onChange={handleChange}
+                                        className="input-field pl-16 pr-4"
+                                    >
+                                        {CAMPUSES.map(c => (
+                                            <option key={c.name} value={c.name} className="text-black">{c.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium text-gray-400 mb-1">Nama Penandatangan{isAdmin ? '' : ' (Otomatis)'}</label>
                             <div className="relative flex items-center">
