@@ -358,6 +358,10 @@ export default function Dashboard() {
                                         <option value="Wakil Kepala Sekolah" />
                                         <option value="Wali Kelas" />
                                         <option value="Ketua Yayasan" />
+                                        <option value="Komandan Kodim" />
+                                        <option value="Komandan Koramil" />
+                                        <option value="Kapolsek" />
+                                        <option value="Camat" />
                                     </datalist>
                                 </div>
                             </div>
