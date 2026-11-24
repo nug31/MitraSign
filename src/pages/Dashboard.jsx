@@ -7,6 +7,8 @@ import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { CAMPUSES, getCampus } from '../lib/campuses';
+import QrSizeControl, { qrPixels, PRINT_DPI } from '../components/QrSizeControl';
+import { pngDataUrlWithDpi } from '../lib/pngDpi';
 
 export default function Dashboard() {
     const { user, profile, signOut, fetchProfile } = useAuthStore();
@@ -40,7 +42,7 @@ export default function Dashboard() {
     const showLogo = !(isAdmin && formData.signerUnit.trim());
 
     const [qrUrl, setQrUrl] = useState('');
-    const [qrSize, setQrSize] = useState(1000); // ukuran PNG hasil download (px)
+    const [qrSize, setQrSize] = useState({ unit: 'cm', value: 2 }); // ukuran PNG hasil download
 
     useEffect(() => {
         if (!user && !loading) {
@@ -58,6 +60,8 @@ export default function Dashboard() {
                 class: profile.default_class || (profile.role === 'kepsek' ? 'Semua Kelas' : '')
             }));
         }
+        // ukuran QR di rapor: wali kelas 1,8 cm, kepala sekolah/admin 2 cm
+        if (profile) setQrSize({ unit: 'cm', value: profile.role === 'walas' ? 1.8 : 2 });
     }, [profile?.id]); // hanya isi ulang saat akun berganti, bukan tiap profil di-refresh (mis. pindah tab)
 
 
@@ -194,7 +198,7 @@ export default function Dashboard() {
     const downloadQr = () => {
         const svg = document.getElementById('qr-code-svg');
         if (!svg) return;
-        const qrPixelSize = Math.min(Math.max(parseInt(qrSize, 10) || 1000, 200), 4000);
+        const qrPixelSize = qrPixels(qrSize);
 
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement('canvas');
@@ -226,7 +230,8 @@ export default function Dashboard() {
                     ctx.drawImage(logoImg, x, y, logoSize, logoSize);
                 }
 
-                const pngFile = canvas.toDataURL('image/png');
+                let pngFile = canvas.toDataURL('image/png');
+                if (qrSize.unit === 'cm') pngFile = pngDataUrlWithDpi(pngFile, PRINT_DPI);
                 const downloadLink = document.createElement('a');
                 downloadLink.download = `QR_Signature_${formData.name}_${formData.class}.png`;
                 downloadLink.href = pngFile;
@@ -565,44 +570,7 @@ export default function Dashboard() {
                         </div>
 
                         <div className="w-full space-y-3">
-                            <div>
-                                <div className="flex items-center justify-between mb-1">
-                                    <label className="text-xs text-gray-400 font-medium">Ukuran PNG</label>
-                                    <div className="flex items-center gap-1">
-                                        <input
-                                            type="number"
-                                            min="200"
-                                            max="4000"
-                                            step="50"
-                                            value={qrSize}
-                                            onChange={(e) => setQrSize(e.target.value)}
-                                            className="w-20 px-2 py-1 text-xs text-right bg-white/5 border border-white/10 rounded-md outline-none focus:border-accent/50"
-                                        />
-                                        <span className="text-xs text-gray-500">px</span>
-                                    </div>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="200"
-                                    max="4000"
-                                    step="50"
-                                    value={Math.min(Math.max(parseInt(qrSize, 10) || 1000, 200), 4000)}
-                                    onChange={(e) => setQrSize(e.target.value)}
-                                    className="w-full accent-accent"
-                                />
-                                <div className="flex gap-2 mt-2">
-                                    {[500, 1000, 2000].map(s => (
-                                        <button
-                                            key={s}
-                                            type="button"
-                                            onClick={() => setQrSize(s)}
-                                            className={`flex-1 py-1 text-xs rounded-md border transition-colors ${Number(qrSize) === s ? 'border-accent/50 text-accent bg-accent/10' : 'border-white/10 text-gray-400 hover:text-white'}`}
-                                        >
-                                            {s}px
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            <QrSizeControl size={qrSize} onChange={setQrSize} />
                             <button
                                 onClick={downloadQr}
                                 disabled={!savedId}
