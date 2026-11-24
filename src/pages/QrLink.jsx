@@ -8,6 +8,7 @@ const QrLink = () => {
     const [mode, setMode] = useState('qr');
     const [url, setUrl] = useState('');
     const [label, setLabel] = useState('');
+    const [qrSize, setQrSize] = useState(1000);
     const [code, setCode] = useState('');
     const [barcodeError, setBarcodeError] = useState('');
     const barcodeRef = useRef(null);
@@ -15,6 +16,7 @@ const QrLink = () => {
     const trimmed = url.trim();
     const value = trimmed && !/^https?:\/\//i.test(trimmed) ? `https://${trimmed}` : trimmed;
     const codeValue = code.trim();
+    const qrPixelSize = Math.min(Math.max(parseInt(qrSize, 10) || 1000, 200), 4000);
 
     useEffect(() => {
         if (mode !== 'barcode' || !codeValue || !barcodeRef.current) return;
@@ -116,13 +118,51 @@ const QrLink = () => {
                                 <QRCodeCanvas
                                     id="qr-link-canvas"
                                     value={value}
-                                    size={1000}
+                                    size={qrPixelSize}
                                     level="M"
                                     marginSize={0}
                                     style={{ width: 280, height: 280 }}
                                 />
                             </div>
                             <p className="text-xs text-slate-500 break-all text-center">{value}</p>
+                            <div className="w-full">
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="text-sm text-gray-400 font-medium">Ukuran PNG</label>
+                                    <div className="flex items-center gap-1">
+                                        <input
+                                            type="number"
+                                            min="200"
+                                            max="4000"
+                                            step="50"
+                                            value={qrSize}
+                                            onChange={(e) => setQrSize(e.target.value)}
+                                            className="w-24 px-2 py-1 text-sm text-right bg-slate-900/50 border border-white/10 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-500">px</span>
+                                    </div>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="200"
+                                    max="4000"
+                                    step="50"
+                                    value={qrPixelSize}
+                                    onChange={(e) => setQrSize(e.target.value)}
+                                    className="w-full"
+                                />
+                                <div className="flex gap-2 mt-2">
+                                    {[500, 1000, 2000].map(s => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            onClick={() => setQrSize(s)}
+                                            className={`flex-1 py-1 text-xs rounded-md border transition-colors ${qrPixelSize === s ? 'border-blue-500 text-blue-400 bg-blue-500/10' : 'border-white/10 text-gray-400 hover:text-white'}`}
+                                        >
+                                            {s}px
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             <button
                                 onClick={() => download('qr-link-canvas', 'QR')}
                                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold transition-colors"

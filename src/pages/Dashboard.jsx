@@ -40,6 +40,7 @@ export default function Dashboard() {
     const showLogo = !(isAdmin && formData.signerUnit.trim());
 
     const [qrUrl, setQrUrl] = useState('');
+    const [qrSize, setQrSize] = useState(1000); // ukuran PNG hasil download (px)
 
     useEffect(() => {
         if (!user && !loading) {
@@ -193,8 +194,8 @@ export default function Dashboard() {
     const downloadQr = () => {
         const svg = document.getElementById('qr-code-svg');
         if (!svg) return;
+        const qrPixelSize = Math.min(Math.max(parseInt(qrSize, 10) || 1000, 200), 4000);
 
-        const scale = 4; // 4x scale for HD quality (250px → 1000px)
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -209,8 +210,9 @@ export default function Dashboard() {
         const handleLoad = () => {
             loadedCount++;
             if (loadedCount === needed) {
-                canvas.width = qrImg.naturalWidth * scale;
-                canvas.height = qrImg.naturalHeight * scale;
+                const scale = qrPixelSize / qrImg.naturalWidth;
+                canvas.width = qrPixelSize;
+                canvas.height = qrPixelSize;
                 ctx.imageSmoothingEnabled = false;
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -563,6 +565,44 @@ export default function Dashboard() {
                         </div>
 
                         <div className="w-full space-y-3">
+                            <div>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="text-xs text-gray-400 font-medium">Ukuran PNG</label>
+                                    <div className="flex items-center gap-1">
+                                        <input
+                                            type="number"
+                                            min="200"
+                                            max="4000"
+                                            step="50"
+                                            value={qrSize}
+                                            onChange={(e) => setQrSize(e.target.value)}
+                                            className="w-20 px-2 py-1 text-xs text-right bg-white/5 border border-white/10 rounded-md outline-none focus:border-accent/50"
+                                        />
+                                        <span className="text-xs text-gray-500">px</span>
+                                    </div>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="200"
+                                    max="4000"
+                                    step="50"
+                                    value={Math.min(Math.max(parseInt(qrSize, 10) || 1000, 200), 4000)}
+                                    onChange={(e) => setQrSize(e.target.value)}
+                                    className="w-full accent-accent"
+                                />
+                                <div className="flex gap-2 mt-2">
+                                    {[500, 1000, 2000].map(s => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            onClick={() => setQrSize(s)}
+                                            className={`flex-1 py-1 text-xs rounded-md border transition-colors ${Number(qrSize) === s ? 'border-accent/50 text-accent bg-accent/10' : 'border-white/10 text-gray-400 hover:text-white'}`}
+                                        >
+                                            {s}px
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             <button
                                 onClick={downloadQr}
                                 disabled={!savedId}
